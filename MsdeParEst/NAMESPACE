@@ -1,0 +1,12 @@
+exportPattern("^[[:alpha:]]+")
+exportMethods(
+    "plot",
+    "pred",
+    "print",
+    "summary",
+    "valid" 
+)
+exportClasses(
+    "Freq.fit",
+     "Freq.mixture.fit" 
+)
