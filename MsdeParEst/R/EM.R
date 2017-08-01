@@ -15,7 +15,7 @@
 #' N x 2 matrix, the components corresponding to a fixed effect should be set to 0. 
 #' @param Niter number of iterations. Defaults to 10.
 #' @param drift.fixed value for the fixed effects in the drift if known (not estimated). Vector of length N. Defaults to 0.
-#' @param drift.estim.fix 1 if the fixed effects in the drift are estimated, 0 otherwise. Defaults to 1.
+#' @param drift.estim.fixed 1 if the fixed effects in the drift are estimated, 0 otherwise. Defaults to 1.
 #' @param drift.fixed.mixt 1 if the value of the fixed effect in the drift is different from one mixture component to
 #' another, 0 otherwise. Defaults to 1. 
 #' @param sigma value for the diffusion parameter if known (not estimated). Defaults to 1.
@@ -28,6 +28,7 @@
 #' \item{probindi}{posterior component probabilites. M x N matrix.}
 #' \item{BIChere}{BIC indicator}
 #' \item{AIChere}{AIC indicator}
+#' @importFrom stats optim
 #' @references
 #' Mixtures of stochastic differential equations with random effects: application to data clustering, M. Delattre, V. Genon-Catalot and A. Samson, \emph{Journal of Statistical Planning and Inference 2016}, Vol 173, \bold{109--124}
 
@@ -71,9 +72,9 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
         omega <- omegahat[iter - 1, , ]
         
         if (sum(drift.random) > 2) {
-            ln <- function(param) (Q_EM(matrix(param[1:(2 * N)], nrow = N, ncol = 2), matrix(param[(2 * 
+            ln <- function(param){Q_EM(matrix(param[1:(2 * N)], nrow = N, ncol = 2), matrix(param[(2 * 
                 N + 1):(4 * N)], nrow = N, ncol = 2), sigma, probindi, U, V, S, K, estimphi, 
-                drift.random))
+                drift.random)}
             paraminit <- c(as.vector(mu), as.vector(omega))
             res <- optim(paraminit, f = ln, method = "Nelder-Mead")
             muhat[iter, , ] <- matrix(res$par[1:(2 * N)], nrow = N, ncol = 2)
@@ -83,9 +84,9 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
         if (drift.estim.fixed == 1) {
             if (drift.fixed.mixt == 0) {
                 if (sum(drift.random) == 2) {
-                  ln <- function(param) (Q_EM(matrix(c(rep(param[1], N), param[2:(N + 1)]), 
+                  ln <- function(param){Q_EM(matrix(c(rep(param[1], N), param[2:(N + 1)]), 
                     nrow = N, ncol = 2), matrix(c(rep(0, N), param[(N + 2):(2 * N + 1)]), 
-                    nrow = N, ncol = 2), sigma, probindi, U, V, S, K, estimphi, drift.random))
+                    nrow = N, ncol = 2), sigma, probindi, U, V, S, K, estimphi, drift.random)}
                   paraminit <- c(mu[1, 1], as.vector(mu[, 2]), as.vector(omega[, 2]))
                   res <- optim(paraminit, f = ln, method = "Nelder-Mead")
                   muhat[iter, , ] <- matrix(c(rep(res$par[1], N), res$par[2:(N + 1)]), 
@@ -96,9 +97,9 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
                 }
                 
                 if (sum(drift.random) == 1) {
-                  ln <- function(param) (Q_EM(matrix(c(param[1:N], rep(param[N + 1], N)), 
+                  ln <- function(param){Q_EM(matrix(c(param[1:N], rep(param[N + 1], N)), 
                     nrow = N, ncol = 2), matrix(c(param[(N + 2):(2 * N + 1)], rep(0, N)), 
-                    nrow = N, ncol = 2), sigma, probindi, U, V, S, K, estimphi, drift.random))
+                    nrow = N, ncol = 2), sigma, probindi, U, V, S, K, estimphi, drift.random)}
                   paraminit <- c(as.vector(mu[, 1]), mu[2, 1], as.vector(omega[, 1]))
                   res <- optim(paraminit, f = ln, method = "Nelder-Mead")
                   muhat[iter, , ] <- matrix(c(res$par[1:N], rep(res$par[N + 1], N)), nrow = N, 
@@ -109,9 +110,9 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
             }
             if (drift.fixed.mixt == 1) {
                 if (sum(drift.random) == 2) {
-                  ln <- function(param) (Q_EM(matrix(param[1:(2 * N)], nrow = N, ncol = 2), 
+                  ln <- function(param){Q_EM(matrix(param[1:(2 * N)], nrow = N, ncol = 2), 
                     matrix(c(rep(0, N), param[(2 * N + 1):(3 * N)]), nrow = N, ncol = 2), 
-                    sigma, probindi, U, V, S, K, estimphi, drift.random))
+                    sigma, probindi, U, V, S, K, estimphi, drift.random)}
                   paraminit <- c(as.vector(mu), as.vector(omega[, 2]))
                   res <- optim(paraminit, f = ln, method = "Nelder-Mead")
                   muhat[iter, , ] <- matrix(c(res$par[1:N], res$par[(N + 1):(2 * N)]), 
@@ -122,9 +123,9 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
                 }
                 
                 if (sum(drift.random) == 1) {
-                  ln <- function(param) (Q_EM(matrix(param[1:(2 * N)], nrow = N, ncol = 2), 
+                  ln <- function(param){Q_EM(matrix(param[1:(2 * N)], nrow = N, ncol = 2), 
                     matrix(c(param[(2 * N + 1):(3 * N)], rep(0, N)), nrow = N, ncol = 2), 
-                    sigma, probindi, U, V, S, K, estimphi, drift.random))
+                    sigma, probindi, U, V, S, K, estimphi, drift.random)}
                   paraminit <- c(as.vector(mu), as.vector(omega[, 1]))
                   res <- optim(paraminit, f = ln, method = "Nelder-Mead")
                   muhat[iter, , ] <- matrix(res$par[1:(2 * N)], nrow = N, ncol = 2)
@@ -136,9 +137,9 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
         
         if (drift.estim.fixed == 0) {
             if (sum(drift.random) == 2) {
-                ln <- function(param) (Q_EM(matrix(c(drift.fixed, param[1:N]), nrow = N, 
+                ln <- function(param){Q_EM(matrix(c(drift.fixed, param[1:N]), nrow = N, 
                   ncol = 2), matrix(c(rep(0, N), param[(N + 1):(2 * N)]), nrow = N, ncol = 2), 
-                  sigma, probindi, U, V, S, K, estimphi, drift.random))
+                  sigma, probindi, U, V, S, K, estimphi, drift.random)}
                 paraminit <- c(as.vector(mu[, 2]), as.vector(omega[, 2]))
                 res <- optim(paraminit, f = ln, method = "Nelder-Mead")
                 muhat[iter, , ] <- matrix(c(drift.fixed, res$par[1:N]), nrow = N, ncol = 2)
@@ -148,9 +149,9 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
             }
             
             if (sum(drift.random) == 1) {
-                ln <- function(param) (Q_EM(matrix(c(param[1:N], drift.fixed), nrow = N, 
+                ln <- function(param){Q_EM(matrix(c(param[1:N], drift.fixed), nrow = N, 
                   ncol = 2), matrix(c(param[(N + 1):(2 * N)], rep(0, N)), nrow = N, ncol = 2), 
-                  sigma, probindi, U, V, S, K, estimphi, drift.random))
+                  sigma, probindi, U, V, S, K, estimphi, drift.random)}
                 paraminit <- c(as.vector(mu[, 1]), as.vector(omega[, 1]))
                 res <- optim(paraminit, f = ln, method = "Nelder-Mead")
                 muhat[iter, , ] <- matrix(c(res$par[1:N], drift.fixed), nrow = N, ncol = 2)
@@ -319,7 +320,7 @@ probind <- function(mu, omega, mixt.prop, sigma, U, V, S, K, estimphi, drift.ran
 #' @param Vj matrix of the sufficient statistics V for individual j (see \code{\link{UVS}}).
 #' @param Sj value of the sufficient statistic S for individual j (see \code{\link{UVS}}).
 #' @param K number of times of observations.
-#' @param estimphij vector  ofestimators of the random effects for individual j.
+#' @param estimphij vector of estimators of the random effects for individual j.
 #' @param drift.random random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random 
 #'  effect or c(1,2) if 2 random effects.
 #' @return
@@ -368,6 +369,7 @@ likelihoodNormalindi <- function(mu, omega, sigma, Uj, Vj, Sj, K, estimphij, dri
 #' @param V list of the M sufficient statistics matrix V (see \code{\link{UVS}}).
 #' @param S vector of the M sufficient statistics S (see \code{\link{UVS}}).
 #' @param K number of times of observations.
+#' @param estimphi matrix of the estimators of the random effects in the drift.
 #' @param drift.random random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random 
 #'  effect or c(1,2) if 2 random effects.
 #' @return

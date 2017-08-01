@@ -22,6 +22,8 @@
 #' \item{sigma}{value of the diffusion coefficient}
 #' \item{BIChere}{BIC indicator}
 #' \item{AIChere}{AIC indicator}
+#' @importFrom stats optim
+#' @importFrom stats var
 
 EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drift.fix = 1, 
     sigma = 0, drift.random, diffusion.estim = 1, discrete = 1) {

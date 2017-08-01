@@ -10,7 +10,7 @@
 #' @param K number of times of observations.
 #' @param drift.random random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects.
 #' @param drift.fixed value of the fixed effect in the drift if it is not estimated. Default to 0.
-#' @param estim.drift.fixed 1 if the fixed effect in the drift is estimated, 0 otherwise. Default to 0.
+#' @param estim.drift.fix 1 if the fixed effect in the drift is estimated, 0 otherwise. Default to 0.
 #' @return
 #' \item{mu}{estimated value of the mean of the Normal distribution}
 #' \item{omega}{estimated value of the standard deviation of the Normal distribution}
@@ -18,8 +18,10 @@
 #' \item{lambda}{estimated value of the scale of the Gamma distribution.}
 #' \item{BIChere}{BIC indicator}
 #' \item{AIChere}{AIC indicator}
+#' @importFrom stats optim
+#' @importFrom stats var
 #' @references
-#' Estimaton of the joint distribution of random effects for a discretely observed diffusion with random effects, M. Delattre, V. Genon-Catalot and C. Larédo, \emph{Preprint}, hal-01446063.
+#' Estimaton of the joint distribution of random effects for a discretely observed diffusion with random effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint}, hal-01446063.
 
 
 EstParamNormalGamma <- function(U, V, S, SigDelta, K, drift.random, drift.fixed = 0, 

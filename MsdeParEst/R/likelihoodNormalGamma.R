@@ -19,7 +19,7 @@
 #' @return
 #' \item{L}{value of -2 x loglikelihood}
 #' @references
-#' Estimaton of the joint distribution of random effects for a discretely observed diffusion with random effects, M. Delattre, V. Genon-Catalot and C. Larédo, \emph{Preprint}, hal-01446063.
+#' Estimaton of the joint distribution of random effects for a discretely observed diffusion with random effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint}, hal-01446063.
 
 
 likelihoodNormalGamma <- function(a, lambda, mu, omega, U, V, S, SigDelta, K, drift.random) {
@@ -28,13 +28,36 @@ likelihoodNormalGamma <- function(a, lambda, mu, omega, U, V, S, SigDelta, K, dr
         L <- Inf
     } else {
         invlambda <- 1/lambda
-        
+        ## Ajout
+        I2 <- diag(c(1,1))
+        ## Ajout
         M <- length(S)
+        
+        ## Ajout
+        estimphi <- matrix(NA, 2, M)
+        
+        for (j in 1:M) {
+          estimphi[, j] <- solve(V[[j]]) %*% U[, j]
+        }
+        ## Ajout
         
         loglik <- vector(length = M)
         V1 <- vector(length = M)
         V2 <- vector(length = M)
         
+        ## Ajout
+        if (length(drift.random) == 2) {
+          Omega <- matrix(c(omega[1]^2, 0, 0, omega[2]^2), 2, 2, byrow = TRUE)
+        }
+        
+        if (sum(drift.random) == 1) {
+          Omega <- matrix(c(omega[1]^2, 0, 0, 0), 2, 2, byrow = TRUE)
+        }
+        
+        if (sum(drift.random) == 2) {
+          Omega <- matrix(c(0, 0, 0, omega[2]^2), 2, 2, byrow = TRUE)
+        }
+        ## Ajout
         
         for (j in 1:M) {
             A <- (I2 + V[[j]] %*% Omega)

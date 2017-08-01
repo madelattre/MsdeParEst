@@ -4,9 +4,9 @@
 #'  of the density renormalised to sum at 1) and a vectors of real values (the grid of estimation)
 #' @param x n real numbers
 #' @param p vector of probability, length n
-
 #' @return
 #' y a simulated value from the discrete distribution
+#' @importFrom stats runif
 
 
 

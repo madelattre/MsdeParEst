@@ -12,11 +12,11 @@
 #' @param diffusion.random default 0, 1 if one random effect in the diffusion, 0 if there is no random effect in the diffusion
 #' @param diffusion.fixed default NULL, fixed effect in the diffusion: value of the fixed effect when there is no random effect in the diffusion and it is not estimated, NULL otherwise
 #' @param estim.diffusion.fix default 0, 1 if the fixed effect in the diffusion is estimated, 0 otherwise
-#' @param estim.method estimation method: 'paramML' for parametric estimation by maximum (approximated) likelihood, 'paramMLmixture' for parametric estimation when the random effects in the drift follow a mixture distribution 
+#' @param mixture 1 if the random effects in the drift follow a mixture distribution, 0 otherwise. Default to 0.
 #' @param nb.mixt default 1, number of mixture components for the distribution of the random effects in the drift 
 #' @param drift.fixed.mixed default 1, 1 if the value of the fixed effect in the drift is different from one mixture component to
 #' another, 0 otherwise. 
-#' @param Niter default 10, number of iterations for the EM algorithm if estim.method='paramMLmixture'
+#' @param Niter default 10, number of iterations for the EM algorithm if mixture='paramMLmixture'
 #' @param discrete default 1, 1 for discrete observations, 0 otherwise. If discrete = 0, and diffusion.random = 0, the exact likelihood associated with continuous observations is 
 #' discretized. If discrete = 1, the likelihood of the Euler scheme of the mixed SDE is computed. 
 #' @return 
@@ -51,7 +51,17 @@
 #' \item{omega}{estimated value of the standard deviation at each iteration of the algorithm. Niter x N x 2 array.}
 #' \item{mixt.prop}{estimated value of the mixture proportions at each iteration of the algorithm. Niter x N matrix.}
 #' \item{probindi}{posterior component probabilites. M x N matrix.}
-
+#' 
+#' @importFrom stats dnorm
+#' @importFrom stats rgamma
+#' @importFrom stats density
+#' @importFrom methods new
+#' @importFrom methods slot
+#' @importFrom methods slotNames
+#' @importFrom stats kmeans
+#' @importFrom stats sd
+#' @importFrom graphics lines
+#' 
 #' @details
 #' Estimation of the random effects density from M independent trajectories of the SDE (the Brownian motions \eqn{W_j} are independent), with linear drift. 
 #' The drift includes one or two random effects and the diffusion includes either a fixed effect or a random effect. Two diffusions are implemented.
@@ -132,8 +142,8 @@
 #' # -- Estimation
 #' 
 #' # -----Fixed effect in the drift estimated
-#' res1 <- msde.fit(times = sim1$times, X = sim1$X, model = "OU", drift.random = 2, diffusion.random = 1, 
-#'                  estim.drift.fix = 1, estim.method = "paramML")
+#' res1 <- msde.fit(times = sim1$times, X = sim1$X, model = "OU", drift.random = 2, 
+#'                  diffusion.random = 1, estim.drift.fix = 1, mixture = 0)
 #' summary(res1)
 #' print(res1)
 #' #pred1 <- pred(res1, invariant = 0, level = 0.05, newwindow = FALSE, plot.pred = TRUE)
@@ -141,8 +151,8 @@
 #' plot(res1)
 #' 
 #' # ----- Fixed effect in the drift known and not estimated
-#' res1bis <- msde.fit(times = sim1$times, X = sim1$X, model = "OU", drift.random = 2, diffusion.random = 1, 
-#'                  drift.fixed=0, estim.method = "paramML")
+#' res1bis <- msde.fit(times = sim1$times, X = sim1$X, model = "OU", drift.random = 2, 
+#'                     diffusion.random = 1, drift.fixed=0, mixture = 0)
 #' summary(res1bis)
 #' 
 #' # Example 2: one random effect in the drift and one fixed effect in the diffusion coefficient
@@ -161,11 +171,12 @@
 #' 
 #' sim2 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random, 
 #'                  diffusion.random = diffusion.random, drift.fixed = drift.fixed, 
-#'                  density.phi = density.phi, drift.param = drift.param, diffusion.param = diffusion.param)
+#'                  density.phi = density.phi, drift.param = drift.param, 
+#'                  diffusion.param = diffusion.param)
 #' 
 #' # -- Estimation
-#' res2 <- msde.fit(times = sim2$times, X = sim2$X, model = "OU", drift.random = 2, diffusion.random = 0,
-#'                  estim.drift.fix = 1, estim.method = "paramML")
+#' res2 <- msde.fit(times = sim2$times, X = sim2$X, model = "OU", drift.random = 2, 
+#'                  diffusion.random = 0, estim.drift.fix = 1, mixture = 0)
 #' 
 #' summary(res2)
 #' plot(res2)
@@ -189,8 +200,8 @@
 #' 
 #' # -- Estimation
 #' 
-#' res3 <- msde.fit(times = sim3$times, X = sim3$X, model = "OU", drift.random = c(1,2), diffusion.random = 1, 
-#'                  estim.method = "paramML")
+#' res3 <- msde.fit(times = sim3$times, X = sim3$X, model = "OU", drift.random = c(1,2), 
+#'                  diffusion.random = 1, mixture = 0)
 #' summary(res3)
 #' plot(res3)
 #' 
@@ -211,12 +222,14 @@
 #'                  diffusion.param = diffusion.param)
 #'
 #' # -- Estimation
-#' res4 <- msde.fit(times = sim4$times, X = sim4$X, model = "OU", drift.random = 0, diffusion.random = 1, 
-#'                  estim.method = "paramML", estim.drift.fix = 0, drift.fixed = c(0,0), discrete = 1)
+#' res4 <- msde.fit(times = sim4$times, X = sim4$X, model = "OU", drift.random = 0, 
+#'                  diffusion.random = 1, mixture = 0, estim.drift.fix = 0, 
+#'                  drift.fixed = c(0,0), discrete = 1)
 #' 
 #' summary(res4)
 #' 
-#' # Example 5: one fixed effect and one mixture random effect in the drift, and one fixed effect in the diffusion coefficient
+#' # Example 5: one fixed effect and one mixture random effect in the drift, and one fixed effect in 
+#' # the diffusion coefficient
 #' 
 #' # -- Simulation
 #' M <- 100
@@ -240,9 +253,9 @@
 #'                  diffusion.param = diffusion.param, nb.mixt = nb.mixt, mixt.prop = mixt.prop)
 #'
 #' # -- Estimation
-#' res5 <- msde.fit(times = sim5$times, X = sim5$X, model = "OU", drift.random = 1, estim.drift.fix = 1,
-#'                  diffusion.random = 0, estim.diffusion.fix = 1, estim.method = "paramMLmixture", 
-#'                  nb.mixt=2, Niter = 25)
+#' res5 <- msde.fit(times = sim5$times, X = sim5$X, model = "OU", drift.random = 1, 
+#'                  estim.drift.fix = 1, diffusion.random = 0, estim.diffusion.fix = 1, 
+#'                  mixture = 1, nb.mixt=2, Niter = 25)
 #' 
 #' summary(res5)
 #' print(res5)
@@ -252,18 +265,22 @@
 #' @keywords estimation
 #' @references See  
 #' Maximum Likelihood Estimation for Stochastic Differential Equations with Random Effects, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{Scandinavian Journal of Statistics 40(2) 2012} \bold{322-343} 
+#' 
 #' Estimation of population parameters in stochastic differential equations with random effects in the diffusion coefficient, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{ESAIM:PS 19 2015} \bold{671-688}
+#' 
 #' Mixtures of stochastic differential equations with random effects: application to data clustering, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{Journal of Statistical Planning and Inference 173 2016} \bold{109-124} 
-#' Parametric inference for discrete observations of diffusion processes with mixed effects, Delattre, M., Genon-Catalot, V. and Larédo, C. \emph{hal-01332630 2016}
-#' Estimation of the joint distribution of random effects for a discretely observed diffusion with random effects, Delattre, M., Genon-Catalot, V. and Larédo, C. \emph{hal-01446063 2017}
+#' 
+#' Parametric inference for discrete observations of diffusion processes with mixed effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01332630 2016}
+#' 
+#' Estimation of the joint distribution of random effects for a discretely observed diffusion with random effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01446063 2017}
 
 
 msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed = NULL, 
                      estim.drift.fix = 0, diffusion.random = 0, diffusion.fixed = NULL, estim.diffusion.fix = 0, 
-                     estim.method = c("paramML", "paramMLmixture"),  
+                     mixture = 0,  
                      nb.mixt = 1, drift.fixed.mixed = 0, Niter = 10, discrete = 1) {
   model <- match.arg(model)
-  estim.method <- match.arg(estim.method)
+  #mixture <- match.arg(mixture)
   
   if (is.matrix(X)) {
     if (nrow(X) == length(times)) {
@@ -280,7 +297,7 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed
   delta <- round(diff(times), 10)
   Tend <- times[length(times)]
   
-  if (estim.method == "paramML") {
+  if (mixture == 0) {
     
     a <- 0
     lambda <- 0
@@ -293,7 +310,7 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed
     estimg <- 0
     gridg <- 0
     estimf <- 0
-    gridf <- 0
+    #gridf <- 0
     
     if (model == "OU") {
       Mindex <- M
@@ -515,9 +532,17 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed
           gridg <- gridg
         }
         
-        estimg <- matrix(dinvgamma(gridg, a, scale = lambda), 1, length(gridg), 
-                         byrow = TRUE)
-        gridg <- matrix(gridg, 1, length(gridg), byrow = TRUE)
+        simupsi2 <- 1/rgamma(500, a, rate = 1/lambda)
+        
+        testpsi <- density(simupsi2, from = min(simupsi2), to = max(simupsi2), bw = 'ucv', n = 500)
+        if (testpsi$bw < 0.1) {
+          testpsi <- density(simupsi2, from = min(simupsi2), to = max(simupsi2), n = 500)
+        }
+        
+        gridg <- seq(min(estimpsi2) * 0.8, max(estimpsi2) * 1.2, length = 500)
+        estimg <- matrix(testpsi$y, nrow = 1)
+        gridg <- matrix(gridg, nrow = 1)
+        
         estimpsi2 <- matrix(estimpsi2, 1, length(estimpsi2), byrow = TRUE)
         ## ? troncation ??? estimpsi2.trunc <- estimpsi2 estimf.trunc <- estimf
         cutoff <- FALSE
@@ -545,9 +570,13 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed
         estimpsi2 <- matrix(estimpsi2, 1, length(estimpsi2), byrow = TRUE)
         
         simupsi2 <- 1/rgamma(500, a, rate = 1/lambda)
+        testpsi <- density(simupsi2, from = min(simupsi2), to = max(simupsi2), bw = 'ucv', n = 500)
+        if (testpsi$bw < 0.1) {
+          testpsi <- density(simupsi2, from = min(simupsi2), to = max(simupsi2), n = 500)
+        }
         
         gridg <- seq(min(estimpsi2) * 0.8, max(estimpsi2) * 1.2, length = 500)
-        estimg <- matrix(dinvgamma(gridg, a, rate = 1/lambda), nrow = 1)
+        estimg <- matrix(testpsi$y, nrow = 1)
         gridg <- matrix(gridg, nrow = 1)
         
         
@@ -658,7 +687,7 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed
   }
   
   
-  if (estim.method == "paramMLmixture") {
+  if (mixture == 1) {
     
     ## 
     cutoff <- FALSE
@@ -1263,6 +1292,9 @@ setMethod("print", "Freq.mixture.fit", function(x) {
 #' @param newwindow logical(1), if TRUE, a new window is opened for the plot
 #' @param ... optional plot parameters
 #'
+#' @importFrom grDevices x11
+#' @importFrom graphics par
+#' @importFrom graphics plot
 
 setMethod(f = "plot", signature = "Freq.fit", definition = function(x, newwindow = FALSE, 
                                                                     ...) {
@@ -1294,12 +1326,12 @@ setMethod(f = "plot", signature = "Freq.fit", definition = function(x, newwindow
     
   } else {
     
-    if (x@gridf==0) {
+   # if (x@gridf==0) {
       # op <- par(mfrow = c(1, 1), mar = c(2.8, 2.8, 2, 2), mgp = c(1.5, 0.5, 0), 
       #           oma = c(1, 1, 1, 1), omi = c(0.2, 0.2, 0.2, 0.2), 
       #           cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
       # plot(x@gridg, x@estimg, main = "Estimated density of the random effect in the diffusion",xlab="Value",ylab="Density")
-    }
+   #  }
     
     if (dim(x@gridf)[1] == 1) {
       
@@ -1339,6 +1371,10 @@ setMethod(f = "plot", signature = "Freq.fit", definition = function(x, newwindow
 #' @param newwindow logical(1), if TRUE, a new window is opened for the plot
 #' @param ... optional plot parameters
 #'
+#' @importFrom grDevices x11
+#' @importFrom graphics par
+#' @importFrom graphics title
+#' @importFrom graphics layout
 
 setMethod(f = 'plot', signature = 'Freq.mixture.fit', definition = function(x, newwindow = FALSE, ...) {
   if (newwindow) {
@@ -1422,6 +1458,9 @@ setGeneric("valid", function(x, ...) {
 #' @param plot.valid logical(1), if TRUE, the results are depicted grafically
 #' @param numj optional number of series to be validated
 #' @param ... optional plot parameters
+#' @importFrom grDevices x11
+#' @importFrom graphics par
+#' @importFrom graphics abline
 #' @references
 #' Dion, C., Hermann, S. and Samson, A. (2016). Mixedsde: a R package to fit mixed stochastic differential equations.
 #'
@@ -1501,7 +1540,7 @@ setMethod(f = "valid", signature = "Freq.fit", definition = function(x, Mrep = 1
   if (dim(x@gridf)[1] == 1) {
     phihat <- x@estimphi[numj]
     
-    if (diffusion.random == 0) {
+    if (x@diffusion.random == 0) {
       sig <- sqrt(x@sigma2)
       if (sum(x@drift.random) == 1) {
         paramfixed <- x@mu[2]
@@ -1534,7 +1573,7 @@ setMethod(f = "valid", signature = "Freq.fit", definition = function(x, Mrep = 1
       }
     }
     
-    if (diffusion.random == 1) {
+    if (x@diffusion.random == 1) {
       psihat <- sqrt(x@estimpsi2[numj])
       if (sum(x@drift.random) == 1) {
         paramfixed <- x@mu[2]
@@ -1603,9 +1642,12 @@ setMethod(f = "valid", signature = "Freq.fit", definition = function(x, Mrep = 1
 #' Prediction method
 #'
 #' @description Prediction
-#' @param x Freq.fit or Bayes.fit class
+#' @param x Freq.fit 
 #' @param ... other optional parameters
 #'
+#' @importFrom graphics abline
+#' @importFrom stats quantile
+#' @importFrom sde sde.sim
 
 
 setGeneric("pred", function(x, ...) {
@@ -1622,6 +1664,8 @@ setGeneric("pred", function(x, ...) {
 #' @param newwindow logical(1), if TRUE, a new window is opened for the plot
 #' @param plot.pred logical(1), if TRUE, the results are depicted grafically
 #' @param ... optional plot parameters
+#' @importFrom grDevices x11
+#' @importFrom graphics par
 #' @references
 #' Dion, C., Hermann, S. and Samson, A. (2016). Mixedsde: a R package to fit mixed stochastic differential equations.
 #'

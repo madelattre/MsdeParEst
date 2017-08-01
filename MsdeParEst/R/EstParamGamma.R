@@ -16,6 +16,8 @@
 #' \item{lambda}{estimated value of the scale of the Gamma distribution.}
 #' \item{BIChere}{BIC indicator.}
 #' \item{AIChere}{AIC indicator.}
+#' @importFrom stats optim 
+#' @importFrom stats var
 
 
 EstParamGamma <- function(U, V, S, SigDelta, K, drift.param = c(0, 0), drift.estim = 1) {

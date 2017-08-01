@@ -10,14 +10,13 @@
 #' @param U matrix of M sufficient statistics U (see \code{\link{UVS}}).
 #' @param V list of the M sufficient statistics matrix V (see \code{\link{UVS}}).
 #' @param S vector of the M sufficient statistics S (see \code{\link{UVS}}).
-#' @param SigDelta vector of the M constant terms of the individual likelihood (see \code{\link{UVS}}).
 #' @param K number of times of observations.
 #' @param drift.fixed values of the fixed effects in the drift. 
 #' @return
 #' \item{L}{value of the contrast}
 #' @references
 #' Estimation of population parameters in stochastic differential equations with random effects in the diffusion coefficient, M. Delattre, V. Genon-Catalot and A. Samson, \emph{ESAIM: Probability and Statistics 2015}, Vol 19, \bold{671 -- 688}
-#' Parametric inference for discrete observations of diffusion processes with mixed effects, M. Delattre, V. Genon-Catalot and C. Larédo, \emph{Preprint 2016}, hal-01332630
+#' Parametric inference for discrete observations of diffusion processes with mixed effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint 2016}, hal-01332630
 #' 
 
 contrastGamma <- function(a, lambda, U, V, S, K, drift.fixed) {
@@ -81,7 +80,7 @@ contrastGamma <- function(a, lambda, U, V, S, K, drift.fixed) {
 #' \item{L}{value of -2 x loglikelihood}
 #' @references
 #' Estimation of population parameters in stochastic differential equations with random effects in the diffusion coefficient, M. Delattre, V. Genon-Catalot and A. Samson, \emph{ESAIM: Probability and Statistics 2015}, Vol 19, \bold{671 -- 688}
-#' Parametric inference for discrete observations of diffusion processes with mixed effects, M. Delattre, V. Genon-Catalot and C. Larédo, \emph{Preprint 2016}, hal-01332630
+#' Parametric inference for discrete observations of diffusion processes with mixed effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint 2016}, hal-01332630
 #' 
 
 likelihoodGamma <- function(a, lambda, U, V, S, SigDelta, K, drift.fixed) {

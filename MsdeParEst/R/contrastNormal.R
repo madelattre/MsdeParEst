@@ -17,7 +17,7 @@
 #' @return
 #' \item{L}{value of the contrast}
 #' @references
-#' Estimaton of the joint distribution of random effects for a discretely observed diffusion with random effects, M. Delattre, V. Genon-Catalot and C. Larédo, \emph{Preprint}, hal-01446063.
+#' Estimaton of the joint distribution of random effects for a discretely observed diffusion with random effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint}, hal-01446063.
 
 contrastNormal <- function(mu, omega, U, V, S, K, estimphi, drift.random) {
     

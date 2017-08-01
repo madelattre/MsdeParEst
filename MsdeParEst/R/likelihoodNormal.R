@@ -20,7 +20,7 @@
 #' \item{L}{value of -2 x loglikelihood}
 #' @references
 #' Maximum likelihood estimation for stochastic differential equations with random effects, M. Delattre, V. Genon-Catalot and A. Samson, \emph{Scandinavian Journal of Statistics 2012}, Vol 40, \bold{322--343}
-#' Parametric inference for discrete observations of diffusion processes with mixed effects, M. Delattre, V. Genon-Catalot and C. Larédo, \emph{Preprint}, hal-01332630
+#' Parametric inference for discrete observations of diffusion processes with mixed effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint}, hal-01332630
 #' 
 
 likelihoodNormal <- function(mu, omega, sigma, U, V, S, SigDelta = 0, K, estimphi, drift.random, 
