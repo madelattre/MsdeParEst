@@ -18,15 +18,15 @@ mixture of normal distributions
 
 \item{\code{gridf}}{matrix of values on which the estimation of the density of the random effects is done}
 
-\item{\code{mu}}{array estimated value of the mean of phi at each iteration of the EM algorithm (Niter x nb.mixt x 2)}
+\item{\code{mu}}{array estimated value of the mean of the drift random effects at each iteration of the EM algorithm (Niter x nb.mixt x 2)}
 
-\item{\code{omega}}{array estimated value of the standard deviation of phi at each iteration of the EM algorithm (Niter x nb.mixt x 2)}
+\item{\code{omega}}{array estimated value of the standard deviation of the drift random effects at each iteration of the EM algorithm (Niter x nb.mixt x 2)}
 
 \item{\code{mixt.prop}}{matrix estimated value of the mixing proportions at each iteration of the EM algorithm (Niter x nb.mixt)}
 
 \item{\code{cutoff}}{value of the cutoff if there is one}
 
-\item{\code{sigma2}}{numeric estimated value of \eqn{\sigma^2} if the diffusion coefficient is not random}
+\item{\code{sigma2}}{numeric estimated value of \eqn{\sigma^2}}
 
 \item{\code{index}}{index of the used trajectories}
 
@@ -34,7 +34,7 @@ mixture of normal distributions
 
 \item{\code{probindi}}{matrix of posterior component probabilities}
 
-\item{\code{estimf}}{matrix estimator of the density of \eqn{\phi}}
+\item{\code{estimf}}{matrix estimator of the density of the drift random effects}
 
 \item{\code{estim.drift.fix}}{numeric 1 if the user asked for the estimation of fixed parameter in the drift}
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/likelihoodNormal.R
 \name{likelihoodNormal}
 \alias{likelihoodNormal}
-\title{Computation Of The Log Likelihood In Mixed Stochastic Differential Equations.}
+\title{Computation Of The Log Likelihood In Mixed Stochastic Differential Equations with random effects in the drift and fixed effect in the diffusion.}
 \usage{
 likelihoodNormal(mu, omega, sigma, U, V, S, SigDelta = 0, K, estimphi,
   drift.random, discrete = 1)
@@ -16,7 +16,7 @@ likelihoodNormal(mu, omega, sigma, U, V, S, SigDelta = 0, K, estimphi,
 
 \item{U}{vector of the M sufficient statistics U (see \code{\link{UVS}}).}
 
-\item{V}{vector of the M sufficient statistics V (see \code{\link{UVS}}).}
+\item{V}{list of the M sufficient statistics matrix V (see \code{\link{UVS}}).}
 
 \item{S}{vector of the M sufficient statistics S (see \code{\link{UVS}}).}
 
@@ -36,11 +36,14 @@ discretized. If discrete = 1, the likelihood of the Euler scheme of the mixed SD
 \item{L}{value of -2 x loglikelihood}
 }
 \description{
-Computation of -2 loglikelihood of the mixed SDE with Normal distribution of the random effects
-and fixed effect in the diffusion coefficient:
- \eqn{dXj(t)= (\alpha_j- \beta_j Xj(t))dt + \sigma a(Xj(t)) dWj(t)}.
+Computation of -2 log-likelihood of the mixed SDE 
+
+ \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma a(X_j(t)) dW_j(t)}
+ 
+with Normal distribution of the drift random effects \eqn{\alpha_j,\beta_j} and fixed effect in the diffusion coefficient.
 }
 \references{
 Maximum likelihood estimation for stochastic differential equations with random effects, M. Delattre, V. Genon-Catalot and A. Samson, \emph{Scandinavian Journal of Statistics 2012}, Vol 40, \bold{322--343}
+
 Parametric inference for discrete observations of diffusion processes with mixed effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint}, hal-01332630
 }

@@ -1,15 +1,19 @@
-#' EM algorithm for mixtures of stochastic differential equations with random effects in the drift
+#' EM algorithm for mixtures of stochastic differential equations with random effects in the drift and
+#' a fixed effect in the diffusion coefficient
 #' 
 #' @description EM algorithm for parameter estimation in the mixed SDE 
-#'  \eqn{dXj(t)= (\alpha_j - \beta_j Xj(t))dt + \sigma a(Xj(t)) dWj(t)} with random effects
-#'  in the drift following a mixture of Gaussian distributions.
+#' 
+#'  \eqn{dX_j(t)= (\alpha_j - \beta_j X_j(t))dt + \sigma a(X_j(t)) dW_j(t)} 
+#'  
+#' with random effects in the drift \eqn{\alpha_j,\beta_j} following a mixture of Gaussian distributions.
 #' @param U matrix of M sufficient statistics U (see \code{\link{UVS}}).
 #' @param V list of the M sufficient statistics matrix V (see \code{\link{UVS}}).
 #' @param S vector of the M sufficient statistics S (see \code{\link{UVS}}).
 #' @param K number of times of observations.
 #' @param drift.random random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random 
 #'  effect or c(1,2) if 2 random effects.
-#' @param start list of starting values: mu, omega, mixt.prop. mixt.prop is a vector of length N, the number of 
+#' @param start list of starting values: mu, omega, mixt.prop, respectively for the mean and the standard deviation of the 
+#' Gaussian distributions and the mixing proportions. mixt.prop is a vector of length N, where N stands for the number of 
 #' mixture components. mu is a N x 2 matrix, first (resp. second) column is the mean of \eqn{\alpha_j} (resp. 
 #' \eqn{\beta_j}) if \eqn{\alpha_j} (resp. \eqn{\beta_j}) is random, the fixed effect value otherwise. omega is a 
 #' N x 2 matrix, the components corresponding to a fixed effect should be set to 0. 
@@ -76,7 +80,7 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
                 N + 1):(4 * N)], nrow = N, ncol = 2), sigma, probindi, U, V, S, K, estimphi, 
                 drift.random)}
             paraminit <- c(as.vector(mu), as.vector(omega))
-            res <- optim(paraminit, f = ln, method = "Nelder-Mead")
+            res <- optim(paraminit, fn = ln, method = "Nelder-Mead")
             muhat[iter, , ] <- matrix(res$par[1:(2 * N)], nrow = N, ncol = 2)
             omegahat[iter, , ] <- matrix(abs(res$par[(2 * N + 1):(4 * N)]), nrow = N, ncol = 2)
         }
@@ -84,52 +88,52 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
         if (drift.estim.fixed == 1) {
             if (drift.fixed.mixt == 0) {
                 if (sum(drift.random) == 2) {
-                  ln <- function(param){Q_EM(matrix(c(rep(param[1], N), param[2:(N + 1)]), 
-                    nrow = N, ncol = 2), matrix(c(rep(0, N), param[(N + 2):(2 * N + 1)]), 
+                  ln <- function(param){Q_EM(matrix(c(rep(param[1], N), param[2:(N + 1)]),
+                    nrow = N, ncol = 2), matrix(c(rep(0, N), param[(N + 2):(2 * N + 1)]),
                     nrow = N, ncol = 2), sigma, probindi, U, V, S, K, estimphi, drift.random)}
                   paraminit <- c(mu[1, 1], as.vector(mu[, 2]), as.vector(omega[, 2]))
-                  res <- optim(paraminit, f = ln, method = "Nelder-Mead")
-                  muhat[iter, , ] <- matrix(c(rep(res$par[1], N), res$par[2:(N + 1)]), 
+                  res <- optim(paraminit, fn = ln, method = "Nelder-Mead")
+                  muhat[iter, , ] <- matrix(c(rep(res$par[1], N), res$par[2:(N + 1)]),
                     nrow = N, ncol = 2)
-                  omegahat[iter, , ] <- matrix(c(rep(0, N), abs(res$par[(N + 2):(2 * N + 
+                  omegahat[iter, , ] <- matrix(c(rep(0, N), abs(res$par[(N + 2):(2 * N +
                     1)])), nrow = N, ncol = 2)
-                  
+
                 }
-                
+
                 if (sum(drift.random) == 1) {
-                  ln <- function(param){Q_EM(matrix(c(param[1:N], rep(param[N + 1], N)), 
-                    nrow = N, ncol = 2), matrix(c(param[(N + 2):(2 * N + 1)], rep(0, N)), 
+                  ln <- function(param){Q_EM(matrix(c(param[1:N], rep(param[N + 1], N)),
+                    nrow = N, ncol = 2), matrix(c(param[(N + 2):(2 * N + 1)], rep(0, N)),
                     nrow = N, ncol = 2), sigma, probindi, U, V, S, K, estimphi, drift.random)}
                   paraminit <- c(as.vector(mu[, 1]), mu[2, 1], as.vector(omega[, 1]))
-                  res <- optim(paraminit, f = ln, method = "Nelder-Mead")
-                  muhat[iter, , ] <- matrix(c(res$par[1:N], rep(res$par[N + 1], N)), nrow = N, 
+                  res <- optim(paraminit, fn = ln, method = "Nelder-Mead")
+                  muhat[iter, , ] <- matrix(c(res$par[1:N], rep(res$par[N + 1], N)), nrow = N,
                     ncol = 2)
-                  omegahat[iter, , ] <- matrix(c(abs(res$par[(N + 2):(2 * N + 1)]), rep(0, 
+                  omegahat[iter, , ] <- matrix(c(abs(res$par[(N + 2):(2 * N + 1)]), rep(0,
                     N)), nrow = N, ncol = 2)
                 }
             }
             if (drift.fixed.mixt == 1) {
                 if (sum(drift.random) == 2) {
-                  ln <- function(param){Q_EM(matrix(param[1:(2 * N)], nrow = N, ncol = 2), 
-                    matrix(c(rep(0, N), param[(2 * N + 1):(3 * N)]), nrow = N, ncol = 2), 
+                  ln <- function(param){Q_EM(matrix(param[1:(2 * N)], nrow = N, ncol = 2),
+                    matrix(c(rep(0, N), param[(2 * N + 1):(3 * N)]), nrow = N, ncol = 2),
                     sigma, probindi, U, V, S, K, estimphi, drift.random)}
                   paraminit <- c(as.vector(mu), as.vector(omega[, 2]))
-                  res <- optim(paraminit, f = ln, method = "Nelder-Mead")
-                  muhat[iter, , ] <- matrix(c(res$par[1:N], res$par[(N + 1):(2 * N)]), 
+                  res <- optim(paraminit, fn = ln, method = "Nelder-Mead")
+                  muhat[iter, , ] <- matrix(c(res$par[1:N], res$par[(N + 1):(2 * N)]),
                     nrow = N, ncol = 2)
-                  omegahat[iter, , ] <- matrix(c(rep(0, N), abs(res$par[(2 * N + 1):(3 * 
+                  omegahat[iter, , ] <- matrix(c(rep(0, N), abs(res$par[(2 * N + 1):(3 *
                     N)])), nrow = N, ncol = 2)
-                  
+
                 }
-                
+
                 if (sum(drift.random) == 1) {
-                  ln <- function(param){Q_EM(matrix(param[1:(2 * N)], nrow = N, ncol = 2), 
-                    matrix(c(param[(2 * N + 1):(3 * N)], rep(0, N)), nrow = N, ncol = 2), 
+                  ln <- function(param){Q_EM(matrix(param[1:(2 * N)], nrow = N, ncol = 2),
+                    matrix(c(param[(2 * N + 1):(3 * N)], rep(0, N)), nrow = N, ncol = 2),
                     sigma, probindi, U, V, S, K, estimphi, drift.random)}
                   paraminit <- c(as.vector(mu), as.vector(omega[, 1]))
-                  res <- optim(paraminit, f = ln, method = "Nelder-Mead")
+                  res <- optim(paraminit, fn = ln, method = "Nelder-Mead")
                   muhat[iter, , ] <- matrix(res$par[1:(2 * N)], nrow = N, ncol = 2)
-                  omegahat[iter, , ] <- matrix(c(abs(res$par[(2 * N + 1):(3 * N)]), rep(0, 
+                  omegahat[iter, , ] <- matrix(c(abs(res$par[(2 * N + 1):(3 * N)]), rep(0,
                     N)), nrow = N, ncol = 2)
                 }
             }
@@ -137,25 +141,25 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
         
         if (drift.estim.fixed == 0) {
             if (sum(drift.random) == 2) {
-                ln <- function(param){Q_EM(matrix(c(drift.fixed, param[1:N]), nrow = N, 
-                  ncol = 2), matrix(c(rep(0, N), param[(N + 1):(2 * N)]), nrow = N, ncol = 2), 
+                ln <- function(param){Q_EM(matrix(c(drift.fixed, param[1:N]), nrow = N,
+                  ncol = 2), matrix(c(rep(0, N), param[(N + 1):(2 * N)]), nrow = N, ncol = 2),
                   sigma, probindi, U, V, S, K, estimphi, drift.random)}
                 paraminit <- c(as.vector(mu[, 2]), as.vector(omega[, 2]))
-                res <- optim(paraminit, f = ln, method = "Nelder-Mead")
+                res <- optim(paraminit, fn = ln, method = "Nelder-Mead")
                 muhat[iter, , ] <- matrix(c(drift.fixed, res$par[1:N]), nrow = N, ncol = 2)
-                omegahat[iter, , ] <- matrix(c(rep(0, N), abs(res$par[(N + 1):(2 * N)])), 
+                omegahat[iter, , ] <- matrix(c(rep(0, N), abs(res$par[(N + 1):(2 * N)])),
                   nrow = N, ncol = 2)
-                
+
             }
-            
+
             if (sum(drift.random) == 1) {
-                ln <- function(param){Q_EM(matrix(c(param[1:N], drift.fixed), nrow = N, 
-                  ncol = 2), matrix(c(param[(N + 1):(2 * N)], rep(0, N)), nrow = N, ncol = 2), 
+                ln <- function(param){Q_EM(matrix(c(param[1:N], drift.fixed), nrow = N,
+                  ncol = 2), matrix(c(param[(N + 1):(2 * N)], rep(0, N)), nrow = N, ncol = 2),
                   sigma, probindi, U, V, S, K, estimphi, drift.random)}
                 paraminit <- c(as.vector(mu[, 1]), as.vector(omega[, 1]))
-                res <- optim(paraminit, f = ln, method = "Nelder-Mead")
+                res <- optim(paraminit, fn = ln, method = "Nelder-Mead")
                 muhat[iter, , ] <- matrix(c(res$par[1:N], drift.fixed), nrow = N, ncol = 2)
-                omegahat[iter, , ] <- matrix(c(abs(res$par[(N + 1):(2 * N)]), rep(0, N)), 
+                omegahat[iter, , ] <- matrix(c(abs(res$par[(N + 1):(2 * N)]), rep(0, N)),
                   nrow = N, ncol = 2)
             }
         }
@@ -223,8 +227,11 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
 #' Computation of the E-step of the EM algorithm for mixtures of stochastic differential equations with random effects
 #' 
 #' @description Computation of the E-step of the EM algorithm for parameter estimation in the mixed SDE 
-#'  \eqn{dXj(t)= (\alpha_j - \beta_j Xj(t))dt + \sigma a(Xj(t)) dWj(t)} with random effects
-#'  in the drift following a mixture of Gaussian distributions.
+#'  
+#'  \eqn{dX_j(t)= (\alpha_j - \beta_j X_j(t))dt + \sigma a(X_j(t)) dW_j(t)} 
+#'  
+#'  with random effects in the drift following a mixture of Gaussian distributions, and a fixed effect in the diffusion.
+#'  
 #' @param mu mean of the random effects. N x 2 matrix, first (resp. second) column is the mean of \eqn{\alpha_j} (resp. 
 #' \eqn{\beta_j}) in each mixture component if \eqn{\alpha_j} (resp. \eqn{\beta_j}) is random, the fixed effect value otherwise. 
 #' @param omega standard deviation of the random effects. N x 2 matrix, the components corresponding to a fixed effect should be 
@@ -240,6 +247,8 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
 #'  effect or c(1,2) if 2 random effects.
 #' @return
 #' \item{Q}{value of the E-step.}
+#' 
+#' @references 
 #' Mixtures of stochastic differential equations with random effects: application to data clustering, M. Delattre, V. Genon-Catalot and A. Samson, \emph{Journal of Statistical Planning and Inference 2016}, Vol 173, \bold{109--124}
 
 Q_EM <- function(mu, omega, sigma, probindi, U, V, S, K, estimphi, drift.random) {
@@ -264,8 +273,11 @@ Q_EM <- function(mu, omega, sigma, probindi, U, V, S, K, estimphi, drift.random)
 #' Computation of the component probabilities
 #' 
 #' @description Computation of the individual component probabilities in the mixed SDE 
-#'  \eqn{dXj(t)= (\alpha_j - \beta_j Xj(t))dt + \sigma a(Xj(t)) dWj(t)} with random effects
-#'  in the drift following a mixture of Gaussian distributions.
+#' 
+#'  \eqn{dXj(t)= (\alpha_j - \beta_j Xj(t))dt + \sigma a(Xj(t)) dWj(t)} 
+#'  
+#'  with random effects in the drift following a mixture of Gaussian distributions, and fixed effect in the diffusion.
+#'  
 #' @param mu mean of the random effects. N x 2 matrix, first (resp. second) column is the mean of \eqn{\alpha_j} (resp. 
 #' \eqn{\beta_j}) in each mixture component if \eqn{\alpha_j} (resp. \eqn{\beta_j}) is random, the fixed effect value otherwise. 
 #' @param omega standard deviation of the random effects. N x 2 matrix, the components corresponding to a fixed effect should be 
@@ -307,10 +319,13 @@ probind <- function(mu, omega, mixt.prop, sigma, U, V, S, K, estimphi, drift.ran
     return(probindi)
 }
 
-#' Computation of the individual Log Likelihood In Mixed Stochastic Differential Equations
+#' Computation of the individual Log-Likelihoods in Mixed Stochastic Differential Equations
 #' 
-#' @description Computation of -2 loglikelihood of individual j in the mixed SDE with Normal distribution of the random effects
-#'  \eqn{dXj(t)= (\alpha_j- \beta_j Xj(t))dt + \sigma a(Xj(t)) dWj(t)}.
+#' @description Computation of -2 log-likelihood of individual j in the mixed SDE with Normal distribution of the drift random effects
+#' and fixed effect in the diffusion:
+#' 
+#'  \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma a(X_j(t)) dW_j(t)}.
+#'  
 #' @param mu vector of mean of the random effects. First (resp. second) value is the mean of \eqn{\alpha_j} (resp. 
 #' \eqn{\beta_j}) if \eqn{\alpha_j} (resp. \eqn{\beta_j}) is random, the fixed effect value otherwise. 
 #' @param omega standard deviation of the random effects. The components corresponding to a fixed effect should be 
@@ -354,11 +369,14 @@ likelihoodNormalindi <- function(mu, omega, sigma, Uj, Vj, Sj, K, estimphij, dri
     return(L)
 }
 
-#' Computation of the Log Likelihood In Mixed Stochastic Differential Equations
+#' Computation of the Log Likelihood in mixtures of Mixed Stochastic Differential Equations
 #' 
-#' @description Computation of -2 loglikelihood the mixed SDE 
-#'  \eqn{dXj(t)= (\alpha_j - \beta_j Xj(t))dt + \sigma a(Xj(t)) dWj(t)} with random effects
-#'  in the drift following a mixture of Gaussian distributions.
+#' @description Computation of -2 log-likelihood the mixed SDE 
+#' 
+#'  \eqn{dX_j(t)= (\alpha_j - \beta_j X_j(t))dt + \sigma a(X_j(t)) dW_j(t)} 
+#'  
+#'  with random effects in the drift \eqn{\alpha_j,\beta_j} following a mixture of Gaussian distributions.
+#'  
 #' @param mu mean of the random effects. N x 2 matrix, first (resp. second) column is the mean of \eqn{\alpha_j} (resp. 
 #' \eqn{\beta_j}) in each mixture component if \eqn{\alpha_j} (resp. \eqn{\beta_j}) is random, the fixed effect value otherwise. 
 #' @param omega standard deviation of the random effects. N x 2 matrix, the components corresponding to a fixed effect should be 

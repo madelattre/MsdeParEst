@@ -1,8 +1,11 @@
 #' Estimation In Mixed Stochastic Differential Equations with random effects in the drift and fixed effect in the diffusion coefficient
 #' 
-#' @description Estimation of the parameters of the mixed SDE with Normal distribution of the random effects in the drift and
-#' fixed parameter in the diffusion:
-#'  \eqn{dXj(t)= (\alpha_j - \beta_j Xj(t))dt + \sigma a(Xj(t)) dWj(t)}, done with \code{\link{likelihoodNormal}}.
+#' @description Estimation of the parameters of the mixed SDE:
+#' 
+#'  \eqn{dX_j(t)= (\alpha_j - \beta_j X_j(t))dt + \sigma a(X_j(t)) dW_j(t)},
+#'  
+#' with Normal distribution of the random effects in the drift \eqn{\alpha_j,\beta_j} and
+#' fixed parameter \eqn{\sigma} in the diffusion. Done with \code{\link{likelihoodNormal}}.
 #' @param U matrix of M sufficient statistics U (see \code{\link{UVS}}).
 #' @param V list of the M sufficient statistics matrix V (see \code{\link{UVS}}).
 #' @param S vector of the M sufficient statistics S (see \code{\link{UVS}}).
@@ -24,6 +27,10 @@
 #' \item{AIChere}{AIC indicator}
 #' @importFrom stats optim
 #' @importFrom stats var
+#' 
+#' @references
+#' Maximum likelihood estimation for stochastic differential equations with random effects, M. Delattre, V. Genon-Catalot and A. Samson, \emph{Scandinavian Journal of Statistics 2012}, Vol 40, \bold{322--343}
+
 
 EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drift.fix = 1, 
     sigma = 0, drift.random, diffusion.estim = 1, discrete = 1) {

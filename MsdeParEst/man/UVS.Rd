@@ -21,6 +21,7 @@ UVS(X, model, times)
 }
 \description{
 Computation of the sufficient statistics of the (approximate) likelihood of the mixed SDE
+ 
  \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j a(X_j(t)) dW_j(t)}.
 }
 \details{
@@ -37,10 +38,16 @@ SigDelta: \eqn{SigDelta(X(t_1),...,X(t_n)) = n log(delta) + \sum_{j=1}^{n} log(a
 }
 \references{
 See  
+
+
 Maximum Likelihood Estimation for Stochastic Differential Equations with Random Effects, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{Scandinavian Journal of Statistics 40(2) 2012} \bold{322-343} 
+
 Estimation of population parameters in stochastic differential equations with random effects in the diffusion coefficient, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{ESAIM:PS 19 2015} \bold{671-688}
+
 Mixtures of stochastic differential equations with random effects: application to data clustering, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{Journal of Statistical Planning and Inference 173 2016} \bold{109-124} 
+
 Parametric inference for discrete observations of diffusion processes with mixed effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01332630 2016}
+
 Estimation of the joint distribution of random effects for a discretely observed diffusion with random effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01446063 2017}
 }
 \keyword{quadratic}

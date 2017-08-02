@@ -3,7 +3,7 @@
 \name{likelihoodGamma}
 \alias{likelihoodGamma}
 \title{Computation of the Euler approximation of -2 log-likelihood when there is one random 
-effect in the diffusion coefficient.}
+effect in the diffusion coefficient and fixed effects in the drift.}
 \usage{
 likelihoodGamma(a, lambda, U, V, S, SigDelta, K, drift.fixed)
 }
@@ -25,14 +25,17 @@ likelihoodGamma(a, lambda, U, V, S, SigDelta, K, drift.fixed)
 \item{drift.fixed}{values of the fixed effects in the drift.}
 }
 \value{
-\item{L}{value of -2 x loglikelihood}
+\item{L}{value of -2 x log-likelihood}
 }
 \description{
-Computation of the Euler approximation of -2 loglikelihood of the mixed SDE:
- \eqn{dXj(t)= (\alpha- \beta Xj(t))dt + \sigma_j a(Xj(t)) dWj(t)}
-with Gamma distribution for \eqn{1/\sigma_j^2} and fixed parameters in the drift.
+Computation of the Euler approximation of -2 log-likelihood of the mixed SDE:
+
+ \eqn{dX_jj(t)= (\alpha - \beta X_j(t))dt + \sigma_j a(X_j(t)) dW_j(t)}
+ 
+with inverse Gamma distribution for \eqn{\sigma_j^2} and fixed parameters \eqn{\alpha,\beta} in the drift.
 }
 \references{
 Estimation of population parameters in stochastic differential equations with random effects in the diffusion coefficient, M. Delattre, V. Genon-Catalot and A. Samson, \emph{ESAIM: Probability and Statistics 2015}, Vol 19, \bold{671 -- 688}
+
 Parametric inference for discrete observations of diffusion processes with mixed effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint 2016}, hal-01332630
 }

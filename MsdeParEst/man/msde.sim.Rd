@@ -4,7 +4,7 @@
 \alias{msde.sim}
 \title{Simulation Of A Mixed Stochastic Differential Equation}
 \usage{
-msde.sim(M, T, N = 100, model, drift.random, diffusion.random, density.phi,
+msde.sim(M, T, N = 100, model, drift.random, diffusion.random, mixture = 0,
   drift.fixed = 0, drift.param, diffusion.param, nb.mixt = 1,
   mixt.prop = 1, t0 = 0, X0 = 0.01, invariant = 0, delta = T/N,
   op.plot = 0, add.plot = FALSE)
@@ -22,12 +22,12 @@ msde.sim(M, T, N = 100, model, drift.random, diffusion.random, density.phi,
 
 \item{diffusion.random}{random effect in the diffusion coefficient: 0 if no random effect, 1 if one multiplicative random effect.}
 
-\item{density.phi}{name of the density of the random effects.}
+\item{mixture}{1 if the random effects in the drift follow a mixture of Normal distributions, 0 otherwise. Default to 0.}
 
 \item{drift.fixed}{fixed effects in the drift: value of the fixed effect when there is only one random effect, 0 otherwise. 
 If drift.random =2, fixed can be 0 but \eqn{\beta} has to be a non negative random variable for the estimation.}
 
-\item{drift.param}{vector of parameters of the distribution of the random effects in the drift.}
+\item{drift.param}{vector (not mixture) or matrix (mixture) of parameters of the distribution of the random effects in the drift.}
 
 \item{diffusion.param}{diffusion parameter if the diffusion coefficient is fixed, vector of parameters of the distribution of the diffusion random effect otherwise.}
 
@@ -52,88 +52,35 @@ If drift.random =2, fixed can be 0 but \eqn{\beta} has to be a non negative rand
 \item{phi}{vector (or matrix) of the M simulated random effects.}
 }
 \description{
-Simulation of M independent trajectories of a mixed stochastic differential equation (SDE) with linear drift  and two random effects \eqn{(\alpha_j, \beta_j)}
- \deqn{dX_j(t)= (\alpha_j- \beta_j X_(t))dt + \sigma a(X_j(t)) dW_j(t)  ,  j=1, ..., M.}
+Simulation of M independent trajectories of a mixed stochastic differential equation (SDE) with linear drift
+ \deqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j a(X_j(t)) dW_j(t)  ,  j=1, ..., M.}
+There may be two random effects \eqn{(\alpha_j, \beta_j)} in the drift and one random effect \eqn{\sigma_j} in the diffusion coefficient.
 }
 \details{
-Simulation of M independent trajectories of the SDE (the Brownian motions \eqn{Wj} are independent), with linear drift. Two diffusions are implemented, with one or two random effects:
-\subsection{Ornstein-Uhlenbeck model (OU)}{
-If random = 1, \eqn{\beta} is a fixed effect: \eqn{dX_j(t)= (\alpha_j- \beta X_j(t))dt + \sigma_j dW_j(t)  } 
+Simulation of M independent trajectories of the SDE (the Brownian motions \eqn{W_j} are independent), with linear drift. There may be one or two
+random effects in the drift: 
 
-If random = 2, \eqn{\alpha} is a fixed effect: \eqn{dX_j(t)= (\alpha - \beta_j X_j(t))dt + \sigma_j dW_j(t)  }
+If drift.random = 0, \eqn{\alpha} and \eqn{\beta} are fixed effects (\eqn{\alpha_j \equiv \alpha} and \eqn{\beta_j \equiv \beta})
 
-If random = c(1,2), \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j dW_j(t)  } 
-}
-\subsection{Cox-Ingersoll-Ross model (CIR)}{
-If random = 1, \eqn{\beta} is a fixed effect: \eqn{dX_j(t)= (\alpha_j- \beta X_j(t))dt + \sigma_j \sqrt{X_j(t)} dW_j(t)  } 
+If drift.random = 1,  \eqn{\beta} is a fixed effect (\eqn{\beta_j \equiv \beta}), and the drift function is written \eqn{(\alpha_j- \beta X_j(t))}
 
-If random = 2, \eqn{\alpha} is a fixed effect: \eqn{dX_j(t)= (\alpha - \beta_j X_j(t))dt + \sigma_j \sqrt{X_j(t)} dW_j(t)  } 
+If drift.random = 2, \eqn{\alpha} is a fixed effect (\eqn{\alpha_j \equiv \alpha}), and the drift function is written \eqn{(\alpha- \beta_j X_j(t))}
 
-If random = c(1,2), \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j \sqrt{X_j(t)}  dW_j(t)  } 
-}
-The initial value of each trajectory can be simulated from the invariant distribution of the process:
- Normal distribution with mean \eqn{\alpha/\beta} and variance \eqn{\sigma^2/(2 \beta)} for the OU,  a gamma distribution
- \eqn{\Gamma(2\alpha/\sigma^2,  \sigma^2/(2\beta))} for the C-I-R model.
+If drift.random = c(1,2), both effects are random, and the drift function is written \eqn{(\alpha_j- \beta_j X_j(t))}
 
-\subsection{Density of the diffusion random effect}{
-We only consider inverse Gamma distributions for \eqn{\sigma_j^2} and diffusion.param=c(shape,scale). 
+Two diffusions are implemented:
 
-}
+Ornstein-Uhlenbeck model (OU): \eqn{a(X_j(t))=1}
 
-\subsection{Density of the drift random effects}{
-Several densities are implemented for the random effects, depending on the number of random effects. 
+Cox-Ingersoll-Ross model (CIR): \eqn{a(X_j(t))=\sqrt{X_j(t)}}
 
-\emph{If two random effects, choice between} 
+There may be either a fixed or a random effect in the diffusion coefficient:
 
-'normixtnormixt': Mixture of \eqn{N} normal distributions for both  \eqn{\alpha} \eqn{\beta} and param=c(mean_\eqn{\alpha}^\eqn{1}, sd_\eqn{\alpha}^\eqn{1}, ..., mean_\eqn{\alpha}^\eqn{N}, sd_\eqn{\alpha}^\eqn{N},mean_\eqn{\beta}^\eqn{1}, sd_\eqn{\beta}^\eqn{1}, ..., mean_\eqn{\beta}^\eqn{N}, sd_\eqn{\beta}^\eqn{N})
+If diffusion.random = 0, \eqn{\sigma} is a fixed effect (\eqn{\sigma_j \equiv \sigma}). In that case, the random effects in the drift follow a Normal distribution 
+or a mixture of Normal distributions.
 
-'normalnormal': Normal distributions for both  \eqn{\alpha} \eqn{\beta} and param=c(mean_\eqn{\alpha}, sd_\eqn{\alpha}, mean_\eqn{\beta}, sd_\eqn{\beta})
-
-'gammagamma': Gamma distributions for both  \eqn{\alpha} \eqn{\beta} and param=c(shape_\eqn{\alpha}, scale_\eqn{\alpha}, shape_\eqn{\beta}, scale_\eqn{\beta})
-
-'gammainvgamma': Gamma for \eqn{\alpha}, Inverse Gamma for \eqn{\beta} and param=c(shape_\eqn{\alpha}, scale_\eqn{\alpha}, shape_\eqn{\beta}, scale_\eqn{\beta})
-
-'normalgamma':  Normal for \eqn{\alpha}, Gamma for \eqn{\beta} and param=c(mean_\eqn{\alpha}, sd_\eqn{\alpha}, shape_\eqn{\beta}, scale_\eqn{\beta})
-
-'normalinvgamma':  Normal for \eqn{\alpha}, Inverse Gamma for \eqn{\beta} and param=c(mean_\eqn{\alpha}, sd_\eqn{\alpha}, shape_\eqn{\beta}, scale_\eqn{\beta})
-
-'gammagamma2':  Gamma \eqn{+2 * \sigma^2} for \eqn{\alpha},  Gamma \eqn{+ 1} for \eqn{\beta}  and param=c(shape_\eqn{\alpha}, scale_\eqn{\alpha}, shape_\eqn{\beta}, scale_\eqn{\beta})
-
-'gammainvgamma2':   Gamma \eqn{+2 * \sigma^2} for \eqn{\alpha}, Inverse Gamma for \eqn{\beta} and param=c(shape_\eqn{\alpha}, scale_\eqn{\alpha}, shape_\eqn{\beta}, scale_\eqn{\beta})
-
-\emph{If only \eqn{\alpha} is random, choice between}
-
-'normixt': Mixture of \eqn{N} normal distributions and param=c(mean_\eqn{\alpha}^\eqn{1}, sd_\eqn{\alpha}^\eqn{1}, ..., mean_\eqn{\alpha}^\eqn{N}, sd_\eqn{\alpha}^\eqn{N})
-
-'normal': Normal distribution with param=c(mean, sd)
-
-lognormal': logNormal distribution with param=c(mean, sd)
-
-'mixture.normal': mixture of normal distributions \eqn{p N(\mu1,\sigma1^2) + (1-p)N(\mu2, \sigma2^2)} with 
-param=c(p, \eqn{\mu1, \sigma1, \mu2, \sigma2})
-
-'gamma': Gamma distribution with param=c(shape, scale) 
-
-'mixture.gamma': mixture of Gamma distribution \eqn{p \Gamma(shape1,scale1) + (1-p)\Gamma(shape2,scale2)}
-with param=c(p, shape1, scale1, shape2, scale2)
-
-'gamma2': Gamma distribution \eqn{+2 * \sigma^2} with param=c(shape, scale) 
-
-'mixed.gamma2': mixture of Gamma distribution \eqn{p \Gamma(shape1,scale1) + (1-p) \Gamma(shape2,scale2)} + \eqn{+2 * \sigma^2}
-with param=c(p, shape1, scale1, shape2, scale2)
-
-\emph{If only \eqn{\beta} is random, choice between}
-
- 'normixt': Mixture of \eqn{N} normal distributions and param=c(mean_\eqn{\beta}^\eqn{1}, sd_\eqn{\beta}^\eqn{1}, ..., mean_\eqn{\beta}^\eqn{N}, sd_\eqn{\beta}^\eqn{N})
-
- 'normal': Normal distribution with param=c(mean, sd)
- 
- 'gamma': Gamma distribution with param=c(shape, scale) 
- 
- 'mixture.gamma': mixture of Gamma distribution \eqn{p \Gamma(shape1,scale1) + (1-p) \Gamma(shape2,scale2)}
-with param=c(p, shape1, scale1, shape2, scale2)
-
-}
+If diffusion.random = 1, \eqn{\sigma_j} is a random effect. In that case, \eqn{\sigma_j^2} follow an inverse Gamma distribution with parameters diffusion.param=c(shape,scale),
+and conditional on \eqn{\sigma_j}, the random effects in the drift follow a Normal distribution with mean mu and variance \eqn{Omega*\sigma_j^2}
 }
 \references{
 This function mixedsde.sim is based on the package sde, function sde.sim. See Simulation and Inference for stochastic differential equation, S.Iacus, \emph{Springer Series in Statistics 2008}

@@ -3,7 +3,7 @@
 \name{contrastGamma}
 \alias{contrastGamma}
 \title{Contrast based on the Euler approximation of the likelihood for parameter estimation when there is one random 
-effect in the diffusion coefficient.}
+effect in the diffusion coefficient and no random effect in the drift.}
 \usage{
 contrastGamma(a, lambda, U, V, S, K, drift.fixed)
 }
@@ -26,12 +26,15 @@ contrastGamma(a, lambda, U, V, S, K, drift.fixed)
 \item{L}{value of the contrast}
 }
 \description{
-Computation of the contrast based on the Euler approximation of -2 loglikelihood for the estimation
+Computation of the contrast based on the Euler approximation of -2 log-likelihood for the estimation
 of the mixed SDE:
- \eqn{dXj(t)= (\alpha- \beta Xj(t))dt + \sigma_j a(Xj(t)) dWj(t)}
+
+ \eqn{dXj(t)= (\alpha- \beta X_j(t))dt + \sigma_j a(X_j(t)) dW_j(t)}
+ 
 with Gamma distribution for \eqn{1/\sigma_j^2} and fixed parameters in the drift.
 }
 \references{
 Estimation of population parameters in stochastic differential equations with random effects in the diffusion coefficient, M. Delattre, V. Genon-Catalot and A. Samson, \emph{ESAIM: Probability and Statistics 2015}, Vol 19, \bold{671 -- 688}
-Parametric inference for discrete observations of diffusion processes with mixed effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint 2016}, hal-01332630
+
+Parametric inference for discrete observations of diffusion processes with mixed effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint 2016, hal-01332630}
 }

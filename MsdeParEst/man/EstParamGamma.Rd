@@ -31,5 +31,11 @@ EstParamGamma(U, V, S, SigDelta, K, drift.param = c(0, 0), drift.estim = 1)
 \description{
 Parameter estimation of the mixed SDE with Gamma distribution of the diffusion random effect 
 and fixed effects in the drift:
- \eqn{dXj(t)= (\alpha- \beta Xj(t))dt + \sigma_j a(Xj(t)) dWj(t), 1/\sigma_j^2 \sim \Gamma(a,lambda)}, done with \code{\link{likelihoodGamma}}.
+
+ \eqn{dXj(t)= (\alpha- \beta Xj(t))dt + \sigma_j a(Xj(t)) dWj(t), 1/\sigma_j^2 \sim \Gamma(a,lambda)}, 
+ 
+done with \code{\link{likelihoodGamma}}.
+}
+\references{
+Estimation of population parameters in stochastic differential equations with random effects in the diffusion coefficient, M. Delattre, V. Genon-Catalot and A. Samson, \emph{ESAIM: Probability and Statistics 2015}, Vol 19, \bold{671 -- 688}
 }

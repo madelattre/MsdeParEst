@@ -2,16 +2,16 @@
 % Please edit documentation in R/contrastNormal.R
 \name{contrastNormal}
 \alias{contrastNormal}
-\title{Computation of the contrast used for the estimation of the Normal conditional distribution
-of the random effects in the drift in Mixed Stochastic 
-Differential Equations with random effects both in the drift and in the diffusion coefficient}
+\title{Computation of the contrast used for the estimation of the normal conditional distribution
+of the random effects in the drift in mixed SDE with random effects in the drift and in the
+diffusion coefficient}
 \usage{
 contrastNormal(mu, omega, U, V, S, K, estimphi, drift.random)
 }
 \arguments{
-\item{mu}{value of the mean of the Normal distribution.}
+\item{mu}{value of the mean of the Gaussian distribution.}
 
-\item{omega}{value of the standard deviation of the Normal distribution.}
+\item{omega}{value of the standard deviation of the Gaussian distribution.}
 
 \item{U}{matrix of M sufficient statistics U (see \code{\link{UVS}}).}
 
@@ -29,11 +29,12 @@ contrastNormal(mu, omega, U, V, S, K, estimphi, drift.random)
 \item{L}{value of the contrast}
 }
 \description{
-Computation of the contrast used for the estimation of the 
-parameters of the Normal conditional distribution of the random effects in the drift when
-the SDE includes random effects both in the drift and in the diffusion coefficient:
+Computation of the contrast used for the estimation of the parameters of the 
+Gaussian conditional distribution of the random effects in the drift \eqn{\alpha_j,\beta_j} when
+the SDE includes random effects in the drift and in the diffusion coefficient:
+
  \eqn{dXj(t)= (\alpha_j - \beta_j Xj(t))dt + \sigma_j a(Xj(t)) dWj(t)}.
 }
 \references{
-Estimaton of the joint distribution of random effects for a discretely observed diffusion with random effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint}, hal-01446063.
+Estimaton of the joint distribution of random effects for a discretely observed diffusion with random effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint, hal-01446063}.
 }

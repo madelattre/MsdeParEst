@@ -1,7 +1,7 @@
 Package: MsdeParEst
 Type: Package
 Title: Parametric estimation in mixed-effects stochastic differential equations
-Version: 3.3.3
+Version: 0.1
 Date: 2017-07-18
 Author: Maud Delattre, Charlotte Dion
 Maintainer: Maud Delattre <maud.delattre@agroparistech.fr>

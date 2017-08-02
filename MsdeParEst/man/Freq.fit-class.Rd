@@ -3,16 +3,16 @@
 \docType{class}
 \name{Freq.fit-class}
 \alias{Freq.fit-class}
-\title{S4 class for the parametric estimation results}
+\title{S4 class for the estimation results in the mixed SDE with random effects in the drift, in the diffusion or both}
 \description{
-S4 class for the parametric estimation results
+S4 class for the estimation results in the mixed SDE with random effects in the drift, in the diffusion or both
 }
 \section{Slots}{
 
 \describe{
 \item{\code{model}}{character 'OU' or 'CIR'}
 
-\item{\code{drift.random}}{numeric 1, 2, or c(1,2)}
+\item{\code{drift.random}}{numeric 0, 1, 2, or c(1,2)}
 
 \item{\code{diffusion.random}}{numeric 0 or 1}
 
@@ -20,13 +20,13 @@ S4 class for the parametric estimation results
 
 \item{\code{gridg}}{matrix of values on which the estimation of the density of the random effects in the diffusion is done}
 
-\item{\code{mu}}{numeric MLE estimator for parametric approach}
+\item{\code{mu}}{numeric estimator of the mean mu of the drift random effects}
 
-\item{\code{omega}}{numeric  MLE estimator for parametric approach}
+\item{\code{omega}}{numeric estimator of the variance of the drift random effects}
 
-\item{\code{a}}{numeric MLE estimator for parametric approach}
+\item{\code{a}}{numeric estimator of the shape of the Gamma distribution for the diffusion random effect}
 
-\item{\code{lambda}}{numeric MLE estimator for parametric approach}
+\item{\code{lambda}}{numeric estimator of the scale of the Gamma distribution for the diffusion random effect}
 
 \item{\code{cutoff}}{value of the cutoff if there is one}
 
@@ -36,7 +36,7 @@ S4 class for the parametric estimation results
 
 \item{\code{estimphi}}{matrix of the estimator of the drift random effects}
 
-\item{\code{estimpsi2}}{vector of the estimator of the diffusion random effects}
+\item{\code{estimpsi2}}{vector of the estimator of the diffusion random effects \eqn{\sigma_j^2}}
 
 \item{\code{estimf}}{estimator of the (conditional) density of \eqn{\phi}, matrix form}
 

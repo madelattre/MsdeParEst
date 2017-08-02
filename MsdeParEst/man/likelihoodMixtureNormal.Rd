@@ -2,7 +2,7 @@
 % Please edit documentation in R/EM.R
 \name{likelihoodMixtureNormal}
 \alias{likelihoodMixtureNormal}
-\title{Computation of the Log Likelihood In Mixed Stochastic Differential Equations}
+\title{Computation of the Log Likelihood in mixtures of Mixed Stochastic Differential Equations}
 \usage{
 likelihoodMixtureNormal(mu, omega, sigma, mixt.prop, U, V, S, K, estimphi,
   drift.random)
@@ -35,9 +35,11 @@ effect or c(1,2) if 2 random effects.}
 \item{L}{value of -2 x loglikelihood}
 }
 \description{
-Computation of -2 loglikelihood the mixed SDE 
- \eqn{dXj(t)= (\alpha_j - \beta_j Xj(t))dt + \sigma a(Xj(t)) dWj(t)} with random effects
- in the drift following a mixture of Gaussian distributions.
+Computation of -2 log-likelihood the mixed SDE 
+
+ \eqn{dX_j(t)= (\alpha_j - \beta_j X_j(t))dt + \sigma a(X_j(t)) dW_j(t)} 
+ 
+ with random effects in the drift \eqn{\alpha_j,\beta_j} following a mixture of Gaussian distributions.
 }
 \references{
 Mixtures of stochastic differential equations with random effects: application to data clustering, M. Delattre, V. Genon-Catalot and A. Samson, \emph{Journal of Statistical Planning and Inference 2016}, Vol 173, \bold{109--124}

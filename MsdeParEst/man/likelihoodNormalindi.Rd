@@ -2,7 +2,7 @@
 % Please edit documentation in R/EM.R
 \name{likelihoodNormalindi}
 \alias{likelihoodNormalindi}
-\title{Computation of the individual Log Likelihood In Mixed Stochastic Differential Equations}
+\title{Computation of the individual Log-Likelihoods in Mixed Stochastic Differential Equations}
 \usage{
 likelihoodNormalindi(mu, omega, sigma, Uj, Vj, Sj, K, estimphij, drift.random)
 }
@@ -32,8 +32,10 @@ effect or c(1,2) if 2 random effects.}
 \item{L}{value of -2 x loglikelihood}
 }
 \description{
-Computation of -2 loglikelihood of individual j in the mixed SDE with Normal distribution of the random effects
- \eqn{dXj(t)= (\alpha_j- \beta_j Xj(t))dt + \sigma a(Xj(t)) dWj(t)}.
+Computation of -2 log-likelihood of individual j in the mixed SDE with Normal distribution of the drift random effects
+and fixed effect in the diffusion:
+
+ \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma a(X_j(t)) dW_j(t)}.
 }
 \references{
 Maximum likelihood estimation for stochastic differential equations with random effects, M. Delattre, V. Genon-Catalot and A. Samson, \emph{Scandinavian Journal of Statistics 2012}, Vol 40, \bold{322--343}

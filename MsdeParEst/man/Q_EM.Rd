@@ -32,10 +32,14 @@ effect or c(1,2) if 2 random effects.}
 }
 \value{
 \item{Q}{value of the E-step.}
-Mixtures of stochastic differential equations with random effects: application to data clustering, M. Delattre, V. Genon-Catalot and A. Samson, \emph{Journal of Statistical Planning and Inference 2016}, Vol 173, \bold{109--124}
 }
 \description{
 Computation of the E-step of the EM algorithm for parameter estimation in the mixed SDE 
- \eqn{dXj(t)= (\alpha_j - \beta_j Xj(t))dt + \sigma a(Xj(t)) dWj(t)} with random effects
- in the drift following a mixture of Gaussian distributions.
+ 
+ \eqn{dX_j(t)= (\alpha_j - \beta_j X_j(t))dt + \sigma a(X_j(t)) dW_j(t)} 
+ 
+ with random effects in the drift following a mixture of Gaussian distributions, and a fixed effect in the diffusion.
+}
+\references{
+Mixtures of stochastic differential equations with random effects: application to data clustering, M. Delattre, V. Genon-Catalot and A. Samson, \emph{Journal of Statistical Planning and Inference 2016}, Vol 173, \bold{109--124}
 }

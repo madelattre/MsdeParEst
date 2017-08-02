@@ -33,9 +33,12 @@ EstParamNormalGamma(U, V, S, SigDelta, K, drift.random, drift.fixed = 0,
 \item{AIChere}{AIC indicator}
 }
 \description{
-Estimation of the parameters of the mixed SDE with Normal distribution of the random effects in the drift and
-the square root of an inverse gamma distributed random effect in the diffusion:
- \eqn{dXj(t)= (\alpha- \beta Xj(t))dt + \sigma a(Xj(t)) dWj(t)}.
+Estimation of the parameters of the mixed SDE
+
+ \eqn{dX_j(t)= (\alpha_j - \beta_j X_j(t))dt + \sigma_j a(X_j(t)) dW_j(t)}
+ 
+with Normal conditional distribution of the random effects in the drift \eqn{\alpha_j,\beta_j | \sigma_j \sim N(\mu,\sigma_j^2 \Omega)}
+and the square root of an inverse Gamma distributed random effect in the diffusion \eqn{\sigma_j^2 \sim Gamma(a,\lambda)}.
 }
 \references{
 Estimaton of the joint distribution of random effects for a discretely observed diffusion with random effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint}, hal-01446063.

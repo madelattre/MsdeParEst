@@ -36,6 +36,8 @@ Mixtures of stochastic differential equations with random effects: application t
 }
 \description{
 Computation of the individual component probabilities in the mixed SDE 
- \eqn{dXj(t)= (\alpha_j - \beta_j Xj(t))dt + \sigma a(Xj(t)) dWj(t)} with random effects
- in the drift following a mixture of Gaussian distributions.
+
+ \eqn{dXj(t)= (\alpha_j - \beta_j Xj(t))dt + \sigma a(Xj(t)) dWj(t)} 
+ 
+ with random effects in the drift following a mixture of Gaussian distributions, and fixed effect in the diffusion.
 }

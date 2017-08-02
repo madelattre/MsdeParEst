@@ -2,7 +2,7 @@
 % Please edit documentation in R/likelihoodNormalGamma.R
 \name{likelihoodNormalGamma}
 \alias{likelihoodNormalGamma}
-\title{Computation Of The Log Likelihood of the Euer scheme in Mixed Stochastic Differential Equations.}
+\title{Computation Of The Log Likelihood of the Euer scheme in Mixed Stochastic Differential Equations with random effects in the drift and in the diffusion.}
 \usage{
 likelihoodNormalGamma(a, lambda, mu, omega, U, V, S, SigDelta, K, drift.random)
 }
@@ -17,7 +17,7 @@ likelihoodNormalGamma(a, lambda, mu, omega, U, V, S, SigDelta, K, drift.random)
 
 \item{U}{vector of the M sufficient statistics U (see \code{\link{UVS}}).}
 
-\item{V}{vector of the M sufficient statistics V (see \code{\link{UVS}}).}
+\item{V}{list of the M sufficient statistics V (see \code{\link{UVS}}).}
 
 \item{S}{vector of the M sufficient statistics S (see \code{\link{UVS}}).}
 
@@ -32,12 +32,13 @@ Required only if discrete = 1. Defaults to 0.}
 \item{L}{value of -2 x loglikelihood}
 }
 \description{
-Computation of -2 loglikelihood of the Euler scheme the mixed SDE 
-and fixed effect in the diffusion coefficient:
- \eqn{dXj(t)= (\alpha_j- \beta_j Xj(t))dt + \sigma_j a(Xj(t)) dWj(t)},
-with Normal conditional distribution of the random effects in the drift and Gamma distribution of 
-\eqn{1/\sigma_j^2} in the diffusion.
+Computation of -2 log-likelihood of the Euler scheme the mixed SDE 
+
+ \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j a(X_j(t)) dW_j(t)},
+ 
+with Normal conditional distribution of the random effects in the drift \eqn{\alpha_j,\beta_j|\sigma_j \sim N(\mu,\sigma_j^2\Omega)}
+and inverse Gamma distribution of the random effect in the diffusion \eqn{1/\sigma_j^2 \sim Gamma(a,\lambda)}.
 }
 \references{
-Estimaton of the joint distribution of random effects for a discretely observed diffusion with random effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint}, hal-01446063.
+Estimation of the joint distribution of random effects for a discretely observed diffusion with random effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint}, hal-01446063.
 }

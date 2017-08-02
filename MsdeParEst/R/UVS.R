@@ -1,7 +1,9 @@
 #' Computation Of The Sufficient Statistics 
 #' 
 #' @description Computation of the sufficient statistics of the (approximate) likelihood of the mixed SDE
+#'  
 #'  \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j a(X_j(t)) dW_j(t)}.
+#'  
 #' @param X matrix of the M trajectories.
 #' @param model name of the SDE: 'OU' (Ornstein-Uhlenbeck) or 'CIR' (Cox-Ingersoll-Ross).
 #' @param times times vector of observation times.
@@ -11,11 +13,18 @@
 #' \item{S}{vector of the M quadratic variations S(X(t_1),...,X(t_n))}
 #' \item{SigDelta}{vector of the M constant contributions to the Euler scheme approximation to the likelihood SigDelta(X(t_1),...,X(t_n))}
 #' @references See  
+#' 
+#' 
 #' Maximum Likelihood Estimation for Stochastic Differential Equations with Random Effects, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{Scandinavian Journal of Statistics 40(2) 2012} \bold{322-343} 
+#' 
 #' Estimation of population parameters in stochastic differential equations with random effects in the diffusion coefficient, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{ESAIM:PS 19 2015} \bold{671-688}
+#' 
 #' Mixtures of stochastic differential equations with random effects: application to data clustering, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{Journal of Statistical Planning and Inference 173 2016} \bold{109-124} 
+#' 
 #' Parametric inference for discrete observations of diffusion processes with mixed effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01332630 2016}
+#' 
 #' Estimation of the joint distribution of random effects for a discretely observed diffusion with random effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01446063 2017}
+#' 
 #' @keywords sufficient statistics, quadratic variations
 #' @details 
 #' Computation of the sufficient statistics of the (approximate) likelihood of the mixed SDE
@@ -67,7 +76,7 @@ UVS <- function(X, model, times) {
         
         
         for (j in 1:M) {
-            b[[j]] <- matrix(apply(matrix(X[j, ], 1, K), 2, bx, 0, c(1, 2)), 2, K)  # 2xK  matrix
+            b[[j]] <- matrix(apply(matrix(X[j, ], 1, K), 2, bx), 2, K)  # 2xK  matrix
             
             U[, j] <- rowSums((b[[j]][, 1:(K - 1)] * matrix((X[j, 2:K] - X[j, 1:(K - 1)]), 
                 2, K - 1, byrow = TRUE)))
@@ -88,7 +97,7 @@ UVS <- function(X, model, times) {
         bsig <- as.list(1:M)
         
         for (j in 1:M) {
-            b[[j]] <- matrix(apply(matrix(X[j, ], 1, K), 2, bx, 0, c(1, 2)), 2, K)
+            b[[j]] <- matrix(apply(matrix(X[j, ], 1, K), 2, bx), 2, K)
             
             bsig[[j]] <- matrix(-1, 2, K)
             bsig[[j]][1, ] <- 1/X[j, ]

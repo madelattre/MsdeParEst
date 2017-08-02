@@ -4,17 +4,13 @@
 \alias{bx}
 \title{Computation Of The Drift Coefficient}
 \usage{
-bx(x, fixed, random)
+bx(x)
 }
 \arguments{
 \item{x}{vector of data}
-
-\item{fixed}{drift constant in front of X (when there is one additive random effect), 0 otherwise}
-
-\item{random}{1 if there is one additive random effect, 2 one multiplicative random effect or c(1,2) for 2 random effects}
 }
 \value{
-\item{b}{The drift is \eqn{b(x,\phi) = \phi_1 b_1(x) + \phi_2 b_2(x)}, the output is \eqn{b_2} except when random c(1,2) then the output is the vector \eqn{(b_1,b_2)^t}}
+\item{b}{The drift is \eqn{b(x,\phi) = \phi_1 b_1(x) + \phi_2 b_2(x)}, the output is the vector \eqn{(b_1,b_2)^t}}
 }
 \description{
 Computation of the drift coefficient

@@ -35,7 +35,7 @@ msde.fit(times, X, model = c("OU", "CIR"), drift.random, drift.fixed = NULL,
 \item{drift.fixed.mixed}{default 1, 1 if the value of the fixed effect in the drift is different from one mixture component to
 another, 0 otherwise.}
 
-\item{Niter}{default 10, number of iterations for the EM algorithm if mixture='paramMLmixture'}
+\item{Niter}{default 10, number of iterations for the EM algorithm if mixture = 1}
 
 \item{discrete}{default 1, 1 for discrete observations, 0 otherwise. If discrete = 0, and diffusion.random = 0, the exact likelihood associated with continuous observations is 
 discretized. If discrete = 1, the likelihood of the Euler scheme of the mixed SDE is computed.}
@@ -72,48 +72,38 @@ For the 'paramMLmixture' method:
 \item{probindi}{posterior component probabilites. M x N matrix.}
 }
 \description{
-Parametric estimation of the random effects \eqn{(\alpha_j, \beta_j, \sigma_j)} joint density in the mixed SDE
+Parametric estimation of the joint density of the random effects \eqn{(\alpha_j, \beta_j, \sigma_j)} in the mixed SDE
+
  \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j a(X_j(t)) dW_j(t)}.
 }
 \details{
 Estimation of the random effects density from M independent trajectories of the SDE (the Brownian motions \eqn{W_j} are independent), with linear drift. 
-The drift includes one or two random effects and the diffusion includes either a fixed effect or a random effect. Two diffusions are implemented.
-\subsection{Ornstein-Uhlenbeck model (OU), if diffusion.random = 0}{
+The drift includes no, one or two random effects: 
 
-If drift.random = 1, \eqn{\beta} is a fixed effect: \eqn{dX_j(t)= (\alpha_j- \beta X_j(t))dt + \sigma dW_j(t)  } 
+if drift.random = 0: \eqn{\alpha_j \equiv \alpha} and \eqn{\beta_j \equiv \beta} are fixed
 
-If drift.random = 2, \eqn{\alpha} is a fixed effect: \eqn{dX_j(t)= (\alpha - \beta_j X_j(t))dt + \sigma dW_j(t)  }
+if drift.random = 1: \eqn{\beta_j \equiv \beta} is fixed and \eqn{\alpha_j} is random
 
-If drift.random = c(1,2), \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma dW_j(t)  } 
-}
-\subsection{Ornstein-Uhlenbeck model (OU), if diffusion.random = 1}{
+if drift.random = 2: \eqn{\alpha_j \equiv \alpha} is fixed and \eqn{\beta_j} is random  
 
-If drift.random = 1, \eqn{\beta} is a fixed effect: \eqn{dX_j(t)= (\alpha_j- \beta X_j(t))dt + \sigma_j dW_j(t)  } 
+if drift.random = c(1,2): \eqn{\alpha_j} and \eqn{\beta_j} are random
 
-If drift.random = 2, \eqn{\alpha} is a fixed effect: \eqn{dX_j(t)= (\alpha - \beta_j X_j(t))dt + \sigma_j dW_j(t)  }
+The diffusion includes either a fixed effect or a random effect:
 
-If drift.random = c(1,2), \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j dW_j(t)  } 
-}
-\subsection{Cox-Ingersoll-Ross model (CIR), if diffusion.random = 0}{
+if diffusion.random = 0: \eqn{\sigma_j \equiv \sigma} is fixed
 
-If drift.random = 1, \eqn{\beta} is a fixed effect: \eqn{dX_j(t)= (\alpha_j- \beta X_j(t))dt + \sigma \sqrt{X_(t)} dWj_(t)  } 
+if diffusion.random = 1: \eqn{\sigma_j} is random
 
-If drift.random = 2, \eqn{\alpha} is a fixed effect: \eqn{dX_j(t)= (\alpha - \beta_j X_j(t))dt + \sigma \sqrt{X_j(t)} dW_j(t)  } 
+If there is no random effect in the diffusion (diffusion.random = 0), the drift random effect follow Gaussian distributions: 
+\eqn{\alpha_j,\beta_j \sim N(\mu,\Omega)}.
+If there is one random effect (\eqn{\sigma_j}) in the diffusion (diffusion.random = 1), \eqn{\sigma_j \sim Gamma(a,\lambda)}, and 
+\eqn{\alpha_j,\beta_j|\sigma_j \sim N(\mu,\sigma_j^2 \Omega)}.
 
-If drift.random = c(1,2), \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma \sqrt{X_j(t)}  dW_j(t)  } 
-}
-\subsection{Cox-Ingersoll-Ross model (CIR), if diffusion.random = 1}{
+Two diffusions are implemented: 
 
-If drift.random = 1, \eqn{\beta} is a fixed effect: \eqn{dX_j(t)= (\alpha_j- \beta X_j(t))dt + \sigma_j \sqrt{X_(t)} dWj_(t)  } 
+the Ornstein-Uhlenbeck model (OU) \eqn{a(X_j(t))=1}
 
-If drift.random = 2, \eqn{\alpha} is a fixed effect: \eqn{dX_j(t)= (\alpha - \beta_j X_j(t))dt + \sigma_j \sqrt{X_j(t)} dW_j(t)  } 
-
-If drift.random = c(1,2), \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j \sqrt{X_j(t)}  dW_j(t)  } 
-}
-
-If diffusion.random = 0, the random effects in the drift follow a Gaussian distribution (or a mixture of Gaussian distributions) with mean mu and standard deviation omega.
-If diffusion.random = 1, the random effects in the diffusion \eqn{sigma_j^2} follow an Inverse Gamma distribution with shape a and scale lambda, and the random effects in the drift follow a Gaussian distribution conditional to the random effect in the drift, with mean mu and standard deviation omega*sigma^2.  
-
+the Cox-Ingersoll-Ross model (CIR) \eqn{a(X_j(t))=\sqrt{X_j(t)}}
 
  Validation method:
  For a number of trajectory numj (fixed by the user or randomly chosen) this function simulates 
@@ -141,14 +131,12 @@ model <- "OU"
 drift.random <- 2
 diffusion.random <- 1
 drift.fixed <- 0
-density.phi <- 'normal'
 drift.param <- c(0.5,0.5)
 diffusion.param <- c(8,1/2)
 
 sim1 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random, 
-                 diffusion.random = diffusion.random, drift.fixed = drift.fixed, 
-                 density.phi = density.phi, drift.param = drift.param, 
-                 diffusion.param = diffusion.param)
+diffusion.random = diffusion.random, drift.fixed = drift.fixed, 
+mixture = 0, drift.param = drift.param, diffusion.param = diffusion.param)
                  
 # -- Estimation
 
@@ -177,13 +165,12 @@ diffusion.random <- 0
 diffusion.param <- 0.5
 drift.random <- 2
 drift.fixed <- 10
-density.phi <- 'normal'
 drift.param <- c(1,sqrt(0.4/4))
 
-sim2 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random, 
-                 diffusion.random = diffusion.random, drift.fixed = drift.fixed, 
-                 density.phi = density.phi, drift.param = drift.param, 
-                 diffusion.param = diffusion.param)
+sim2 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random,
+diffusion.random = diffusion.random, drift.fixed = drift.fixed,
+mixture=0, drift.param = drift.param,
+diffusion.param = diffusion.param)
 
 # -- Estimation
 res2 <- msde.fit(times = sim2$times, X = sim2$X, model = "OU", drift.random = 2, 
@@ -205,9 +192,9 @@ density.phi <- 'normalnormal'
 drift.param <- c(1,0.5,0.5,0.5)
 diffusion.param <- c(8,1/2)
 
-sim3 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random, 
-                 diffusion.random = diffusion.random, density.phi = density.phi, 
-                 drift.param = drift.param, diffusion.param = diffusion.param)
+sim3 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random,
+diffusion.random = diffusion.random, mixture = 0,
+drift.param = drift.param, diffusion.param = diffusion.param)
 
 # -- Estimation
 
@@ -222,15 +209,15 @@ plot(res3)
 M <- 100
 Tmax <- 5
 N <- 5000
-
 model <- "OU"
 drift.random <- 0
 diffusion.random <- 1
 drift.fixed <- c(0,1)
 diffusion.param <- c(5,3)
-sim4 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random, 
-                 diffusion.random = diffusion.random, drift.fixed = drift.fixed, 
-                 diffusion.param = diffusion.param)
+
+sim4 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random,
+diffusion.random = diffusion.random, drift.fixed = drift.fixed,
+diffusion.param = diffusion.param)
 
 # -- Estimation
 res4 <- msde.fit(times = sim4$times, X = sim4$X, model = "OU", drift.random = 0, 
@@ -251,7 +238,6 @@ diffusion.param <- 0.1
 model <- "OU"
 drift.random <- 1
 drift.fixed <- 1
-density.phi <- 'mixture.normal'
 nb.mixt <- 2
 mixt.prop <- c(0.5,0.5)
 param.ea1 <- c(0.5, 0.25, 1.8, 0.25)
@@ -260,7 +246,7 @@ drift.param <- param.ea1
 
 sim5 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random,
                  diffusion.random = diffusion.random, drift.fixed = drift.fixed,
-                 density.phi = density.phi, drift.param = drift.param, 
+                 mixture=1, drift.param = drift.param,
                  diffusion.param = diffusion.param, nb.mixt = nb.mixt, mixt.prop = mixt.prop)
 
 # -- Estimation

@@ -1,8 +1,11 @@
 #' Estimation In Mixed Stochastic Differential Equations with random effects in the drift and in the diffusion coefficient
 #' 
-#' @description Estimation of the parameters of the mixed SDE with Normal distribution of the random effects in the drift and
-#' the square root of an inverse gamma distributed random effect in the diffusion:
-#'  \eqn{dXj(t)= (\alpha- \beta Xj(t))dt + \sigma a(Xj(t)) dWj(t)}.
+#' @description Estimation of the parameters of the mixed SDE
+#' 
+#'  \eqn{dX_j(t)= (\alpha_j - \beta_j X_j(t))dt + \sigma_j a(X_j(t)) dW_j(t)}
+#'  
+#' with Normal conditional distribution of the random effects in the drift \eqn{\alpha_j,\beta_j | \sigma_j \sim N(\mu,\sigma_j^2 \Omega)}
+#' and the square root of an inverse Gamma distributed random effect in the diffusion \eqn{\sigma_j^2 \sim Gamma(a,\lambda)}.
 #' @param U matrix of M sufficient statistics U (see \code{\link{UVS}}).
 #' @param V list of the M sufficient statistics matrix V (see \code{\link{UVS}}).
 #' @param S vector of the M sufficient statistics S (see \code{\link{UVS}}).

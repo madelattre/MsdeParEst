@@ -2,7 +2,8 @@
 % Please edit documentation in R/EM.R
 \name{EM}
 \alias{EM}
-\title{EM algorithm for mixtures of stochastic differential equations with random effects in the drift}
+\title{EM algorithm for mixtures of stochastic differential equations with random effects in the drift and
+a fixed effect in the diffusion coefficient}
 \usage{
 EM(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0,
   drift.estim.fixed = 1, drift.fixed.mixt = 1, sigma = 1,
@@ -20,7 +21,8 @@ EM(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0,
 \item{drift.random}{random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random 
 effect or c(1,2) if 2 random effects.}
 
-\item{start}{list of starting values: mu, omega, mixt.prop. mixt.prop is a vector of length N, the number of 
+\item{start}{list of starting values: mu, omega, mixt.prop, respectively for the mean and the standard deviation of the 
+Gaussian distributions and the mixing proportions. mixt.prop is a vector of length N, where N stands for the number of 
 mixture components. mu is a N x 2 matrix, first (resp. second) column is the mean of \eqn{\alpha_j} (resp. 
 \eqn{\beta_j}) if \eqn{\alpha_j} (resp. \eqn{\beta_j}) is random, the fixed effect value otherwise. omega is a 
 N x 2 matrix, the components corresponding to a fixed effect should be set to 0.}
@@ -49,8 +51,10 @@ another, 0 otherwise. Defaults to 1.}
 }
 \description{
 EM algorithm for parameter estimation in the mixed SDE 
- \eqn{dXj(t)= (\alpha_j - \beta_j Xj(t))dt + \sigma a(Xj(t)) dWj(t)} with random effects
- in the drift following a mixture of Gaussian distributions.
+
+ \eqn{dX_j(t)= (\alpha_j - \beta_j X_j(t))dt + \sigma a(X_j(t)) dW_j(t)} 
+ 
+with random effects in the drift \eqn{\alpha_j,\beta_j} following a mixture of Gaussian distributions.
 }
 \references{
 Mixtures of stochastic differential equations with random effects: application to data clustering, M. Delattre, V. Genon-Catalot and A. Samson, \emph{Journal of Statistical Planning and Inference 2016}, Vol 173, \bold{109--124}
