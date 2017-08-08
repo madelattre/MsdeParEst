@@ -5,9 +5,8 @@
 \title{Estimation Of The Random Effects In Mixed Stochastic Differential Equations}
 \usage{
 msde.fit(times, X, model = c("OU", "CIR"), drift.random, drift.fixed = NULL,
-  estim.drift.fix = 0, diffusion.random = 0, diffusion.fixed = NULL,
-  estim.diffusion.fix = 0, mixture = 0, nb.mixt = 1,
-  drift.fixed.mixed = 0, Niter = 10, discrete = 1)
+  diffusion.random = 0, diffusion.fixed = NULL, mixture = 0,
+  nb.mixt = 1, Niter = 10, discrete = 1)
 }
 \arguments{
 \item{times}{vector of observation times}
@@ -18,22 +17,15 @@ msde.fit(times, X, model = c("OU", "CIR"), drift.random, drift.fixed = NULL,
 
 \item{drift.random}{random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects}
 
-\item{drift.fixed}{default NULL, fixed effect in the drift: value of the fixed effect when there is only one random effect and it is not estimated, NULL otherwise}
-
-\item{estim.drift.fix}{default 0, 1 if the fixed effect in the drift is estimated, 0 if the fixed effect in the drift is known}
+\item{drift.fixed}{NULL if the fixed effect(s) in the drift is (are) estimated, value of the fixed effect(s) otherwise. Default to NULL}
 
 \item{diffusion.random}{default 0, 1 if one random effect in the diffusion, 0 if there is no random effect in the diffusion}
 
-\item{diffusion.fixed}{default NULL, fixed effect in the diffusion: value of the fixed effect when there is no random effect in the diffusion and it is not estimated, NULL otherwise}
-
-\item{estim.diffusion.fix}{default 0, 1 if the fixed effect in the diffusion is estimated, 0 otherwise}
+\item{diffusion.fixed}{NULL if the fixed effect in the diffusion is estimated, value of the fixed effect otherwise. Default to NULL}
 
 \item{mixture}{1 if the random effects in the drift follow a mixture distribution, 0 otherwise. Default to 0.}
 
-\item{nb.mixt}{default 1, number of mixture components for the distribution of the random effects in the drift}
-
-\item{drift.fixed.mixed}{default 1, 1 if the value of the fixed effect in the drift is different from one mixture component to
-another, 0 otherwise.}
+\item{nb.mixt}{default 1, number of mixture components for the distribution of the random effects in the drift otherwise.}
 
 \item{Niter}{default 10, number of iterations for the EM algorithm if mixture = 1}
 
@@ -59,7 +51,7 @@ discretized. If discrete = 1, the likelihood of the Euler scheme of the mixed SD
 \item{drift.random}{initial choice}
 \item{diffusion.random}{initial choice}
 \item{drift.fixed}{initial choice}
-\item{estim.drift.fixed}{initial choice}
+\item{estim.drift.fix}{initial choice}
 \item{estim.diffusion.fixed}{initial choice}
 \item{discrete}{initial choice}
 \item{times}{initial choice}
@@ -127,7 +119,7 @@ the Cox-Ingersoll-Ross model (CIR) \eqn{a(X_j(t))=\sqrt{X_j(t)}}
 M <- 100
 Tmax <- 5
 N <- 5000
-model <- "OU"
+model <- 'OU'
 drift.random <- 2
 diffusion.random <- 1
 drift.fixed <- 0
@@ -141,16 +133,14 @@ mixture = 0, drift.param = drift.param, diffusion.param = diffusion.param)
 # -- Estimation
 
 # -----Fixed effect in the drift estimated
-res1 <- msde.fit(times = sim1$times, X = sim1$X, model = "OU", drift.random = 2, 
+res1 <- msde.fit(times = sim1$times, X = sim1$X, model = 'OU', drift.random = 2, 
                  diffusion.random = 1, estim.drift.fix = 1, mixture = 0)
 summary(res1)
-print(res1)
-#pred1 <- pred(res1, invariant = 0, level = 0.05, newwindow = FALSE, plot.pred = TRUE)
 valid(res1)
 plot(res1)
 
 # ----- Fixed effect in the drift known and not estimated
-res1bis <- msde.fit(times = sim1$times, X = sim1$X, model = "OU", drift.random = 2, 
+res1bis <- msde.fit(times = sim1$times, X = sim1$X, model = 'OU', drift.random = 2, 
                     diffusion.random = 1, drift.fixed=0, mixture = 0)
 summary(res1bis)
 
@@ -160,7 +150,7 @@ summary(res1bis)
 M <- 100
 Tmax <- 5
 N <- 5000
-model <- "OU"
+model <- 'OU'
 diffusion.random <- 0
 diffusion.param <- 0.5
 drift.random <- 2
@@ -173,7 +163,7 @@ mixture=0, drift.param = drift.param,
 diffusion.param = diffusion.param)
 
 # -- Estimation
-res2 <- msde.fit(times = sim2$times, X = sim2$X, model = "OU", drift.random = 2, 
+res2 <- msde.fit(times = sim2$times, X = sim2$X, model = 'OU', drift.random = 2, 
                  diffusion.random = 0, estim.drift.fix = 1, mixture = 0)
 
 summary(res2)
@@ -185,7 +175,7 @@ plot(res2)
 M <- 100
 Tmax <- 5
 N <- 5000
-model <- "OU"
+model <- 'OU'
 drift.random <- c(1,2)
 diffusion.random <- 1
 density.phi <- 'normalnormal'
@@ -198,7 +188,7 @@ drift.param = drift.param, diffusion.param = diffusion.param)
 
 # -- Estimation
 
-res3 <- msde.fit(times = sim3$times, X = sim3$X, model = "OU", drift.random = c(1,2), 
+res3 <- msde.fit(times = sim3$times, X = sim3$X, model = 'OU', drift.random = c(1,2), 
                  diffusion.random = 1, mixture = 0)
 summary(res3)
 plot(res3)
@@ -209,7 +199,7 @@ plot(res3)
 M <- 100
 Tmax <- 5
 N <- 5000
-model <- "OU"
+model <- 'OU'
 drift.random <- 0
 diffusion.random <- 1
 drift.fixed <- c(0,1)
@@ -220,7 +210,7 @@ diffusion.random = diffusion.random, drift.fixed = drift.fixed,
 diffusion.param = diffusion.param)
 
 # -- Estimation
-res4 <- msde.fit(times = sim4$times, X = sim4$X, model = "OU", drift.random = 0, 
+res4 <- msde.fit(times = sim4$times, X = sim4$X, model = 'OU', drift.random = 0, 
                  diffusion.random = 1, mixture = 0, estim.drift.fix = 0, 
                  drift.fixed = c(0,0), discrete = 1)
 
@@ -235,7 +225,7 @@ Tmax <- 5
 N <- 5000
 diffusion.random <- 0
 diffusion.param <- 0.1
-model <- "OU"
+model <- 'OU'
 drift.random <- 1
 drift.fixed <- 1
 nb.mixt <- 2
@@ -250,12 +240,11 @@ sim5 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.ran
                  diffusion.param = diffusion.param, nb.mixt = nb.mixt, mixt.prop = mixt.prop)
 
 # -- Estimation
-res5 <- msde.fit(times = sim5$times, X = sim5$X, model = "OU", drift.random = 1, 
+res5 <- msde.fit(times = sim5$times, X = sim5$X, model = 'OU', drift.random = 1, 
                  estim.drift.fix = 1, diffusion.random = 0, estim.diffusion.fix = 1, 
                  mixture = 1, nb.mixt=2, Niter = 25)
 
 summary(res5)
-print(res5)
 plot(res5)
   }
 

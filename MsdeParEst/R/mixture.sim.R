@@ -23,20 +23,24 @@ mixture.sim <- function(M, param, prob) {
     index <- sample(1:N, M, replace = TRUE, prob)
     
   
-        if (is.matrix(param) == 1) {
-            Y <- matrix(NA, 2, M)
-            for (j in 1:M) {
-                for (n in 1:2) {
-                  Y[n, j] <- rnorm(1, param[n, 2 * index[j] - 1], param[n, 2 * index[j]])
-                }
-            }
-        }
-        if (is.matrix(param) == 0) {
+        # if (is.matrix(param) == 1) {
+        #     Y <- matrix(NA, 2, M)
+        #     for (j in 1:M) {
+        #         for (n in 1:2) {
+        #           Y[n, j] <- rnorm(1, param[n, 2 * index[j] - 1], param[n, 2 * index[j]])
+        #         }
+        #     }
+        # }
+        # if (is.matrix(param) == 0) {
             Y <- rep(NA, M)
             for (j in 1:M) {
-                Y[j] <- rnorm(1, param[2 * index[j] - 1], param[2 * index[j]])
+                Y[j] <- rnorm(1, param[index[j],1], param[index[j],2])
             }
-        }
-        
-    return(Y)
+        # }
+    
+    res = list(Y=Y,index=index)
+    
+    return(res)
 }
+
+

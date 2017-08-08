@@ -4,8 +4,7 @@
 \alias{EstParamNormalGamma}
 \title{Estimation In Mixed Stochastic Differential Equations with random effects in the drift and in the diffusion coefficient}
 \usage{
-EstParamNormalGamma(U, V, S, SigDelta, K, drift.random, drift.fixed = 0,
-  estim.drift.fix = 0)
+EstParamNormalGamma(U, V, S, SigDelta, K, drift.random, drift.fixed = NULL)
 }
 \arguments{
 \item{U}{matrix of M sufficient statistics U (see \code{\link{UVS}}).}
@@ -20,9 +19,7 @@ EstParamNormalGamma(U, V, S, SigDelta, K, drift.random, drift.fixed = 0,
 
 \item{drift.random}{random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects.}
 
-\item{drift.fixed}{value of the fixed effect in the drift if it is not estimated. Default to 0.}
-
-\item{estim.drift.fix}{1 if the fixed effect in the drift is estimated, 0 otherwise. Default to 0.}
+\item{drift.fixed}{NULL if the fixed effect(s) in the drift is (are) estimated, value of the fixed effect(s) otherwise. Default to NULL.}
 }
 \value{
 \item{mu}{estimated value of the mean of the Normal distribution}

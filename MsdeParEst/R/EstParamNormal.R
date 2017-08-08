@@ -12,11 +12,9 @@
 #' @param SigDelta vector of the M constant terms of the individual likelihood (see \code{\link{UVS}}). 
 #' Required only if discrete = 1. Defaults to 0. 
 #' @param K number of times of observations.
-#' @param drift.fixed value of the fixed effect in the drift if it is not estimated. Default to 0.
-#' @param estim.drift.fix 1 if the fixed effect in the drift is estimated, 0 otherwise. Default to 1.
-#' @param sigma value of the fixed effect in the diffusion if known (not estimated). Defaults to 0.
+#' @param drift.fixed NULL if thz fixed effect in the drift is estimated, value of the fixed effect otherwise. Default to NULL.
+#' @param sigma value of the fixed effect in the diffusion if known (not estimated), NULL otherwise. Defaults to NULL.
 #' @param drift.random random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects.
-#' @param diffusion.estim 1 if sigma is estimated, 0 otherwise.
 #' @param discrete 1 for discrete observations, 0 otherwise. If discrete = 0, the exact likelihood associated with continuous observations is 
 #' discretized. If discrete = 1, the likelihood of the Euler scheme of the mixed SDE is computed. Defaults to 1.
 #' @return
@@ -32,8 +30,8 @@
 #' Maximum likelihood estimation for stochastic differential equations with random effects, M. Delattre, V. Genon-Catalot and A. Samson, \emph{Scandinavian Journal of Statistics 2012}, Vol 40, \bold{322--343}
 
 
-EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drift.fix = 1, 
-    sigma = 0, drift.random, diffusion.estim = 1, discrete = 1) {
+EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = NULL, 
+    sigma = NULL, drift.random, discrete = 1) {
     
     
     M <- length(S)
@@ -48,7 +46,7 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
     
     if (discrete == 1) {
         
-        if (diffusion.estim == 1) {
+        if (is.null(sigma)) {
             
             k <- 0.1
             
@@ -80,7 +78,7 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
                 init.omega2 <- var(estimphi[1, ]) * init.gamma
                 
                 
-                if (estim.drift.fix == 1) {
+                if (is.null(drift.fixed)) {
                   ln = function(param) {
                     likelihoodNormal(c(param[1], param[2]), c(param[3], 0), exp(param[4]), 
                       U, V, S, SigDelta, K, estimphi, drift.random, discrete)
@@ -95,7 +93,7 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
                   nbparam <- 4
                 }
                 
-                if (estim.drift.fix == 0) {
+                if (!is.null(drift.fixed)) {
                   ln = function(param) {
                     likelihoodNormal(c(param[1], drift.fixed), c(param[2], 0), exp(param[3]), 
                       U, V, S, SigDelta, K, estimphi, drift.random, discrete)
@@ -116,7 +114,7 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
                 init.omega2 <- var(estimphi[2, ]) * init.gamma
                 
                 
-                if (estim.drift.fix == 1) {
+                if (is.null(drift.fixed)) {
                   ln = function(param) {
                     likelihoodNormal(c(param[1], param[2]), c(0, param[3]), exp(param[4]), 
                       U, V, S, SigDelta, K, estimphi, drift.random, discrete)
@@ -131,7 +129,7 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
                   nbparam <- 4
                 }
                 
-                if (estim.drift.fix == 0) {
+                if (!is.null(drift.fixed)) {
                   ln = function(param) {
                     likelihoodNormal(c(drift.fixed, param[1]), c(0, param[2]), exp(param[3]), 
                       U, V, S, SigDelta, K, estimphi, drift.random, discrete)
@@ -150,7 +148,7 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
             
         }
         
-        if (diffusion.estim == 0) {
+        if (!is.null(sigma)) {
             
             init.mu <- apply(estimphi, 1, mean)
             
@@ -175,7 +173,7 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
             if (sum(drift.random) == 1) {
                 init.omega2 <- var(estimphi[1, ])/sigma^2
                 
-                if (estim.drift.fix == 1) {
+                if (is.null(drift.fixed)) {
                   ln = function(param) {
                     likelihoodNormal(c(param[1], param[2]), c(param[3], 0), sigma, U, V, 
                       S, SigDelta, K, estimphi, drift.random, discrete)
@@ -189,7 +187,7 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
                   nbparam <- 3
                 }
                 
-                if (estim.drift.fix == 0) {
+                if (!is.null(drift.fixed)) {
                   ln = function(param) {
                     likelihoodNormal(c(param[1], drift.fixed), c(param[2], 0), sigma, U, 
                       V, S, SigDelta, K, estimphi, drift.random, discrete)
@@ -208,7 +206,7 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
             if (sum(drift.random) == 2) {
                 init.omega2 <- var(estimphi[2, ])/sigma^2
                 
-                if (estim.drift.fix == 1) {
+                if (is.null(drift.fixed)) {
                   ln = function(param) {
                     likelihoodNormal(c(param[1], param[2]), c(0, param[3]), sigma, U, V, 
                       S, SigDelta, K, estimphi, drift.random, discrete)
@@ -222,7 +220,7 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
                   nbparam <- 3
                 }
                 
-                if (estim.drift.fix == 0) {
+                if (!is.null(drift.fixed)) {
                   ln = function(param) {
                     likelihoodNormal(c(drift.fixed, param[1]), c(0, param[2]), sigma, U, 
                       V, S, SigDelta, K, estimphi, drift.random, discrete)
@@ -243,7 +241,7 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
     
     if (discrete == 0) {
         
-        if (diffusion.estim == 1) {
+        if (is.null(sigma)) {
             sigma <- sqrt(mean(S/(K - 1)))
         }
         
@@ -261,13 +259,13 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
             mu <- c(res$par[1], res$par[2])
             omega <- c(abs(res$par[3]), abs(res$par[4])) * sigma
             
-            nbparam <- 4 + diffusion.estim
+            nbparam <- 4 + is.null(sigma)
         }
         
         if (sum(drift.random) == 1) {
             init.omega2 <- var(estimphi[1, ])/sigma^2
             
-            if (estim.drift.fix == 1) {
+            if (is.null(drift.fixed)) {
                 ln = function(param) {
                   likelihoodNormal(c(param[1], param[2]), c(param[3], 0), sigma, U, V, 
                     S, SigDelta, K, estimphi, drift.random, discrete)
@@ -278,10 +276,10 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
                 mu <- c(res$par[1], res$par[2])
                 omega <- c(abs(res$par[3]), 0) * sigma
                 
-                nbparam <- 3 + diffusion.estim
+                nbparam <- 3 + is.null(sigma)
             }
             
-            if (estim.drift.fix == 0) {
+            if (!is.null(drift.fixed)) {
                 ln = function(param) {
                   likelihoodNormal(c(param[1], drift.fixed), c(param[2], 0), sigma, U, 
                     V, S, SigDelta, K, estimphi, drift.random, discrete)
@@ -292,7 +290,7 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
                 mu <- c(res$par[1], drift.fixed)
                 omega <- c(abs(res$par[2]), 0) * sigma
                 
-                nbparam <- 2 + diffusion.estim
+                nbparam <- 2 + is.null(sigma)
             }
             
         }
@@ -300,7 +298,7 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
         if (sum(drift.random) == 2) {
             init.omega2 <- var(estimphi[2, ])/sigma^2
             
-            if (estim.drift.fix == 1) {
+            if (is.null(drift.fixed)) {
                 ln = function(param) {
                   likelihoodNormal(c(param[1], param[2]), c(0, param[3]), sigma, U, V, 
                     S, SigDelta, K, estimphi, drift.random, discrete)
@@ -311,10 +309,10 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
                 mu <- c(res$par[1], res$par[2])
                 omega <- c(0, abs(res$par[3])) * sigma
                 
-                nbparam <- 3 + diffusion.estim
+                nbparam <- 3 + is.null(sigma)
             }
             
-            if (estim.drift.fix == 0) {
+            if (!is.null(drift.fixed)) {
                 ln = function(param) {
                   likelihoodNormal(c(drift.fixed, param[1]), c(0, param[2]), sigma, U, 
                     V, S, SigDelta, K, estimphi, drift.random, discrete)
@@ -325,7 +323,7 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = 0, estim.drif
                 mu <- c(drift.fixed, res$par[1])
                 omega <- c(0, abs(res$par[2])) * sigma
                 
-                nbparam <- 2 + diffusion.estim
+                nbparam <- 2 + is.null(sigma)
             }
             
         }

@@ -8,7 +8,7 @@ Validation of the chosen model.}
 valid(x, ...)
 }
 \arguments{
-\item{x}{Freq.fit or Freq.mixture.fit class}
+\item{x}{Fit.class or Mixture.fit.class class}
 
 \item{...}{other optional parameters}
 }

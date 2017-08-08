@@ -4,9 +4,8 @@
 \alias{EstParamNormal}
 \title{Estimation In Mixed Stochastic Differential Equations with random effects in the drift and fixed effect in the diffusion coefficient}
 \usage{
-EstParamNormal(U, V, S, SigDelta = 0, K, drift.fixed = 0,
-  estim.drift.fix = 1, sigma = 0, drift.random, diffusion.estim = 1,
-  discrete = 1)
+EstParamNormal(U, V, S, SigDelta = 0, K, drift.fixed = NULL, sigma = NULL,
+  drift.random, discrete = 1)
 }
 \arguments{
 \item{U}{matrix of M sufficient statistics U (see \code{\link{UVS}}).}
@@ -20,15 +19,11 @@ Required only if discrete = 1. Defaults to 0.}
 
 \item{K}{number of times of observations.}
 
-\item{drift.fixed}{value of the fixed effect in the drift if it is not estimated. Default to 0.}
+\item{drift.fixed}{NULL if thz fixed effect in the drift is estimated, value of the fixed effect otherwise. Default to NULL.}
 
-\item{estim.drift.fix}{1 if the fixed effect in the drift is estimated, 0 otherwise. Default to 1.}
-
-\item{sigma}{value of the fixed effect in the diffusion if known (not estimated). Defaults to 0.}
+\item{sigma}{value of the fixed effect in the diffusion if known (not estimated), NULL otherwise. Defaults to NULL.}
 
 \item{drift.random}{random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects.}
-
-\item{diffusion.estim}{1 if sigma is estimated, 0 otherwise.}
 
 \item{discrete}{1 for discrete observations, 0 otherwise. If discrete = 0, the exact likelihood associated with continuous observations is 
 discretized. If discrete = 1, the likelihood of the Euler scheme of the mixed SDE is computed. Defaults to 1.}

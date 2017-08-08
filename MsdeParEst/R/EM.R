@@ -18,12 +18,8 @@
 #' \eqn{\beta_j}) if \eqn{\alpha_j} (resp. \eqn{\beta_j}) is random, the fixed effect value otherwise. omega is a 
 #' N x 2 matrix, the components corresponding to a fixed effect should be set to 0. 
 #' @param Niter number of iterations. Defaults to 10.
-#' @param drift.fixed value for the fixed effects in the drift if known (not estimated). Vector of length N. Defaults to 0.
-#' @param drift.estim.fixed 1 if the fixed effects in the drift are estimated, 0 otherwise. Defaults to 1.
-#' @param drift.fixed.mixt 1 if the value of the fixed effect in the drift is different from one mixture component to
-#' another, 0 otherwise. Defaults to 1. 
-#' @param sigma value for the diffusion parameter if known (not estimated). Defaults to 1.
-#' @param sigma.estim 1 if the diffusion parameter is estimated, 0 otherwise. Defaults to 1.  
+#' @param drift.fixed NULL if the fixed effects in the drift are estimated, vector of the N values of the fixed effect otherwise. Default to NULL.  
+#' @param sigma value for the diffusion parameter if known (not estimated), NULL otherwise. Defaults to NULL.
 #' @return
 #' \item{mu}{estimated value of the mean at each iteration of the algorithm. Niter x N x 2 array. }
 #' \item{omega}{estimated value of the standard deviation at each iteration of the algorithm. Niter x N x 2 array.}
@@ -38,8 +34,8 @@
 
 
 
-EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, drift.estim.fixed = 1, 
-    drift.fixed.mixt = 1, sigma = 1, sigma.estim = 1) {
+EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = NULL,  
+               sigma = NULL) {
     
     M <- dim(U)[2]
     
@@ -55,7 +51,7 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
         estimphi[, j] <- solve(V[[j]]) %*% U[, j]
     }
     
-    if (sigma.estim == 1) {
+    if (is.null(sigma)) {
         sigma <- sqrt(mean(S/(K - 1)))
     }
     
@@ -85,34 +81,8 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
             omegahat[iter, , ] <- matrix(abs(res$par[(2 * N + 1):(4 * N)]), nrow = N, ncol = 2)
         }
         
-        if (drift.estim.fixed == 1) {
-            if (drift.fixed.mixt == 0) {
-                if (sum(drift.random) == 2) {
-                  ln <- function(param){Q_EM(matrix(c(rep(param[1], N), param[2:(N + 1)]),
-                    nrow = N, ncol = 2), matrix(c(rep(0, N), param[(N + 2):(2 * N + 1)]),
-                    nrow = N, ncol = 2), sigma, probindi, U, V, S, K, estimphi, drift.random)}
-                  paraminit <- c(mu[1, 1], as.vector(mu[, 2]), as.vector(omega[, 2]))
-                  res <- optim(paraminit, fn = ln, method = "Nelder-Mead")
-                  muhat[iter, , ] <- matrix(c(rep(res$par[1], N), res$par[2:(N + 1)]),
-                    nrow = N, ncol = 2)
-                  omegahat[iter, , ] <- matrix(c(rep(0, N), abs(res$par[(N + 2):(2 * N +
-                    1)])), nrow = N, ncol = 2)
+        if (is.null(drift.fixed)) {
 
-                }
-
-                if (sum(drift.random) == 1) {
-                  ln <- function(param){Q_EM(matrix(c(param[1:N], rep(param[N + 1], N)),
-                    nrow = N, ncol = 2), matrix(c(param[(N + 2):(2 * N + 1)], rep(0, N)),
-                    nrow = N, ncol = 2), sigma, probindi, U, V, S, K, estimphi, drift.random)}
-                  paraminit <- c(as.vector(mu[, 1]), mu[2, 1], as.vector(omega[, 1]))
-                  res <- optim(paraminit, fn = ln, method = "Nelder-Mead")
-                  muhat[iter, , ] <- matrix(c(res$par[1:N], rep(res$par[N + 1], N)), nrow = N,
-                    ncol = 2)
-                  omegahat[iter, , ] <- matrix(c(abs(res$par[(N + 2):(2 * N + 1)]), rep(0,
-                    N)), nrow = N, ncol = 2)
-                }
-            }
-            if (drift.fixed.mixt == 1) {
                 if (sum(drift.random) == 2) {
                   ln <- function(param){Q_EM(matrix(param[1:(2 * N)], nrow = N, ncol = 2),
                     matrix(c(rep(0, N), param[(2 * N + 1):(3 * N)]), nrow = N, ncol = 2),
@@ -136,10 +106,10 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
                   omegahat[iter, , ] <- matrix(c(abs(res$par[(2 * N + 1):(3 * N)]), rep(0,
                     N)), nrow = N, ncol = 2)
                 }
-            }
+            
         }
         
-        if (drift.estim.fixed == 0) {
+        if (!is.null(drift.fixed)) {
             if (sum(drift.random) == 2) {
                 ln <- function(param){Q_EM(matrix(c(drift.fixed, param[1:N]), nrow = N,
                   ncol = 2), matrix(c(rep(0, N), param[(N + 1):(2 * N)]), nrow = N, ncol = 2),
@@ -168,12 +138,12 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
         
     }
     
-    if (sigma.estim == 1) {
+    if (is.null(sigma)) {
         
         if (sum(drift.random) > 2) {
             nbparam <- 4 * N + 1
         }
-        if (drift.estim.fixed == 1) {
+        if (is.null(drift.fixed)) {
             if (sum(drift.random) == 2) {
                 nbparam <- 3 * N + 1
             }
@@ -181,7 +151,7 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
                 nbparam <- 3 * N + 1
             }
         }
-        if (drift.estim.fixed == 0) {
+        if (!is.null(drift.fixed)) {
             if (sum(drift.random) == 2) {
                 nbparam <- 2 * N + 1
             }
@@ -190,12 +160,12 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
             }
         }
     }
-    if (sigma.estim == 0) {
+    if (!is.null(sigma)) {
         
         if (sum(drift.random) > 2) {
             nbparam <- 4 * N
         }
-        if (drift.estim.fixed == 1) {
+        if (is.null(drift.fixed)) {
             if (sum(drift.random) == 2) {
                 nbparam <- 3 * N
             }
@@ -203,7 +173,7 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0, dri
                 nbparam <- 3 * N
             }
         }
-        if (drift.estim.fixed == 0) {
+        if (!is.null(drift.fixed)) {
             if (sum(drift.random) == 2) {
                 nbparam <- 2 * N
             }

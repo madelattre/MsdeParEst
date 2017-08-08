@@ -7,7 +7,7 @@
 out(x)
 }
 \arguments{
-\item{x}{Freq.fit or Freq.mixture.fit class}
+\item{x}{Fit.class or Mixture.fit.class class}
 }
 \description{
 Method for the S4 classes

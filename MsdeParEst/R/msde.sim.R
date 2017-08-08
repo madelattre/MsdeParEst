@@ -10,15 +10,14 @@
 #' @param drift.random random effects in the drift: 0 if no random effect, 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects.
 #' @param diffusion.random random effect in the diffusion coefficient: 0 if no random effect, 1 if one multiplicative random effect.
 #' @param mixture 1 if the random effects in the drift follow a mixture of Normal distributions, 0 otherwise. Default to 0.
-#' @param drift.fixed fixed effects in the drift: value of the fixed effect when there is only one random effect, 0 otherwise. 
+#' @param drift.param fixed effects in the drift: value of the fixed effect when there is only one random effect, 0 otherwise. 
 #' If drift.random =2, fixed can be 0 but \eqn{\beta} has to be a non negative random variable for the estimation.
-#' @param drift.param vector (not mixture) or matrix (mixture) of parameters of the distribution of the random effects in the drift.
+#' vector (not mixture) or matrix (mixture) of parameters of the distribution of the random effects in the drift.
 #' @param diffusion.param diffusion parameter if the diffusion coefficient is fixed, vector of parameters of the distribution of the diffusion random effect otherwise. 
 #' @param nb.mixt number of mixture components if the drift random effects follow a mixture distribution, default nb.mixt=1.
 #' @param mixt.prop vector of mixture proportions if the drift random effects follow a mixture distribution, default mixt.prop=1.
 #' @param t0 time origin, default 0.
-#' @param X0 initial value of the process, default X0=0.
-#' @param invariant 1 if the initial value is simulated from the invariant distribution, default 0.01 and X0 is fixed.
+#' @param X0 initial value of the process, default X0=0.001.
 #' @param delta time step of the simulation (T/N).
 #' @param op.plot 1 if a plot of the trajectories is required, default 0. 
 #' @param add.plot 1 for add trajectories to an existing plot
@@ -62,8 +61,8 @@
 
 
 msde.sim <- function(M, T, N = 100, model, drift.random, diffusion.random, mixture = 0, 
-    drift.fixed = 0, drift.param, diffusion.param, nb.mixt = 1, mixt.prop = 1, t0 = 0, 
-    X0 = 0.01, invariant = 0, delta = T/N, op.plot = 0, add.plot = FALSE) {
+    drift.param, diffusion.param, nb.mixt = 1, mixt.prop = 1, t0 = 0, 
+    X0 = 0.01, delta = T/N, op.plot = 0, add.plot = FALSE) {
     
     
     ## local sde.sim to sink undesired output away into a tempfile
@@ -76,8 +75,8 @@ msde.sim <- function(M, T, N = 100, model, drift.random, diffusion.random, mixtu
         res
     }
     
-    if (missing(X0) && missing(invariant)) {
-        message("Be careful, X0 and invariant are missing thus the initial value X0=0.01 is used")
+    if (missing(X0)) {
+        message("Be careful, X0 is missing thus the initial value X0=0.01 is used")
     }
     
     if (((sum(drift.random)) == 0) && (diffusion.random == 0)) {
@@ -109,38 +108,24 @@ msde.sim <- function(M, T, N = 100, model, drift.random, diffusion.random, mixtu
                 phi[2, ] <- rnorm(M, drift.param[3], drift.param[4])
             }
             if (mixture == 1) {
-                phi <- mixture.sim(M, drift.param, mixt.prop)
+                phi[1, ] <- mixture.sim(M, drift.param[,c(1,2)], mixt.prop)
+                phi[2, ] <- mixture.sim(M, drift.param[,c(3,4)], mixt.prop)
             }
             
             
             # simulation of the series
             if (model == "OU") {
                 for (j in 1:M) {
-                  if (invariant == 1) {
-                    X0 <- phi[1, j]/phi[2, j] + (sig/(sqrt(2 * phi[2, j]))) * rnorm(1)
                     suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
                       method = "EA", theta = c(phi[, j], sig), model = "OU"))
-                  }
-                  if (invariant == 0) {
-                    suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
-                      method = "EA", theta = c(phi[, j], sig), model = "OU"))
-                  }
                 }
             }
             
             if (model == "CIR") {
                 for (j in 1:M) {
-                  if (invariant == 1) {
-                    X0 <- rgamma(1, 2 * phi[1, j]/sig^2, scale = sig^2/(2 * phi[2, j]))
-                    suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
-                      method = "milstein", theta = c(phi[, j], sig), model = "CIR", sigma.x = expression(sig/(2 * 
-                        sqrt(x))), sigma = expression(sig * sqrt(x))))
-                  }
-                  if (invariant == 0) {
                     suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
                       method = "milstein", theta = c(phi[, j], sig), sigma.x = expression(sig/(2 * 
                         sqrt(x))), sigma = expression(sig * sqrt(x)), model = "CIR"))
-                  }
                 }
                 
             }
@@ -151,44 +136,51 @@ msde.sim <- function(M, T, N = 100, model, drift.random, diffusion.random, mixtu
             # simulation of the random effects
             phi <- rep(0, M)
             if (mixture == 1) {
-                phi <- mixture.sim(M, drift.param, mixt.prop)
+                sim <- mixture.sim(M, drift.param[,c(1,2)], mixt.prop)
+                phi <- sim$Y
+                index <- sim$index
+                
+                # simulation of the series
+                if (model == "OU") {
+                  for (j in 1:M) {
+                    suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
+                                                       method = "EA", theta = c(phi[j], drift.param[index[j],3], sig), model = "OU"))
+                  }
+                }
+                
+                if (model == "CIR") {
+                  for (j in 1:M) {
+                    suppressMessages(X[j, ] <- sde.sim(T = T, N = N, X0 = X0, delta = delta, 
+                                                       method = "milstein", theta = c(phi[j], drift.param[index[j],3], sig), sigma.x = expression(sig/(2 * 
+                                                                                                                                                sqrt(x))), sigma = expression(sig * sqrt(x)), model = "CIR"))
+                  }
+                }
             }
+            
+            
             if (mixture == 0) {
                 phi <- drift.param[1] + drift.param[2] * rnorm(M, mean = 0, sd = 1)
-            }
-            
-            
-            
-            # simulation of the series
-            if (model == "OU") {
-                for (j in 1:M) {
-                  if (invariant == 1) {
-                    X0 <- phi[j]/drift.fixed + (sig/(sqrt(2 * drift.fixed))) * rnorm(1)
+                
+                # simulation of the series
+                if (model == "OU") {
+                  for (j in 1:M) {
                     suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
-                      method = "EA", theta = c(phi[j], drift.fixed, sig), model = "OU"))
+                                                       method = "EA", theta = c(phi[j], drift.param[3], sig), model = "OU"))
                   }
-                  if (invariant == 0) {
-                    suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
-                      method = "EA", theta = c(phi[j], drift.fixed, sig), model = "OU"))
+                }
+                
+                if (model == "CIR") {
+                  for (j in 1:M) {
+                    suppressMessages(X[j, ] <- sde.sim(T = T, N = N, X0 = X0, delta = delta, 
+                                                       method = "milstein", theta = c(phi[j], drift.param[3], sig), sigma.x = expression(sig/(2 * 
+                                                                                                                                                sqrt(x))), sigma = expression(sig * sqrt(x)), model = "CIR"))
                   }
                 }
             }
             
-            if (model == "CIR") {
-                for (j in 1:M) {
-                  if (invariant == 1) {
-                    X0 <- rgamma(1, 2 * phi[j]/sig^2, scale = sig^2/(2 * drift.fixed))
-                    suppressMessages(X[j, ] <- sde.sim(T = T, N = N, X0 = X0, delta = delta, 
-                      method = "milstein", theta = c(phi[j], drift.fixed, sig), sigma.x = expression(sig/(2 * 
-                        sqrt(x))), sigma = expression(sig * sqrt(x)), model = "CIR"))
-                  }
-                  if (invariant == 0) {
-                    suppressMessages(X[j, ] <- sde.sim(T = T, N = N, X0 = X0, delta = delta, 
-                      method = "milstein", theta = c(phi[j], drift.fixed, sig), sigma.x = expression(sig/(2 * 
-                        sqrt(x))), sigma = expression(sig * sqrt(x)), model = "CIR"))
-                  }
-                }
-            }
+            
+            
+
             
         }
         
@@ -197,48 +189,50 @@ msde.sim <- function(M, T, N = 100, model, drift.random, diffusion.random, mixtu
             # simulation of the random effects
             phi <- rep(0, M)
             if (mixture == 1) {
-                phi <- mixture.sim(M, drift.param, mixt.prop)
-            }
-            if (mixture == 0) {
-                phi <- drift.param[1] + drift.param[2] * rnorm(M, mean = 0, sd = 1)
-            }
-            
-            # simulation of the series
-            if (model == "OU") {
-                for (j in 1:M) {
-                  if (invariant == 1) {
-                    X0 <- (sig/(sqrt(2 * phi[j]))) * rnorm(1)
+                sim <- mixture.sim(M, drift.param[,c(2,3)], mixt.prop)
+                phi <- sim$Y
+                index <- sim$index
+                
+                # simulation of the series
+                if (model == "OU") {
+                  for (j in 1:M) {
                     suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
-                      method = "EA", theta = c(drift.fixed, phi[j], sig), model = "OU"))
-                  }
-                  if (invariant == 0) {
-                    suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
-                      method = "EA", theta = c(drift.fixed, phi[j], sig), model = "OU"))
-                  }
-                }
-            }
-            
-            if (model == "CIR") {
-                for (j in 1:M) {
-                  if (invariant == 0) {
-                    suppressMessages(X[j, ] <- sde.sim(t0, T, X0, N, delta, method = "milstein", 
-                      theta = c(drift.fixed, phi[j], sig), sigma.x = expression(sig/(2 * 
-                        sqrt(x))), sigma = expression(sig * sqrt(x)), model = "CIR"))
-                  }
-                  if (invariant == 1) {
-                    if (drift.fixed == 0) {
-                      message("no invariant distribution, please fix X0")
-                    }
-                    if (drift.fixed != 0) {
-                      X0 <- rgamma(1, 2 * drift.fixed/sig^2, scale = sig^2/(2 * phi[j]))
-                      suppressMessages(X[j, ] <- sde.sim(t0 = t0, T = T, X0 = X0, N, delta = delta, 
-                        method = "milstein", theta = c(drift.fixed, phi[j], sig), sigma.x = expression(sig/(2 * 
-                          sqrt(x))), sigma = expression(sig * sqrt(x)), model = "CIR"))
-                    }
+                                                       method = "EA", theta = c(drift.param[index[j],1], phi[j], sig), model = "OU"))
                   }
                 }
                 
+                if (model == "CIR") {
+                  for (j in 1:M) {
+                    suppressMessages(X[j, ] <- sde.sim(t0, T, X0, N, delta, method = "milstein", 
+                                                       theta = c(drift.param[index[j],1], phi[j], sig), sigma.x = expression(sig/(2 * 
+                                                                                                                           sqrt(x))), sigma = expression(sig * sqrt(x)), model = "CIR"))
+                  }
+                  
+                }
             }
+            
+            if (mixture == 0) {
+                phi <- drift.param[2] + drift.param[3] * rnorm(M, mean = 0, sd = 1)
+                
+                # simulation of the series
+                if (model == "OU") {
+                  for (j in 1:M) {
+                    suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
+                                                       method = "EA", theta = c(drift.param[1], phi[j], sig), model = "OU"))
+                  }
+                }
+                
+                if (model == "CIR") {
+                  for (j in 1:M) {
+                    suppressMessages(X[j, ] <- sde.sim(t0, T, X0, N, delta, method = "milstein", 
+                                                       theta = c(drift.param[1], phi[j], sig), sigma.x = expression(sig/(2 * 
+                                                                                                                           sqrt(x))), sigma = expression(sig * sqrt(x)), model = "CIR"))
+                  }
+                  
+                }
+            }
+            
+           
         }
         
     }
@@ -263,15 +257,8 @@ msde.sim <- function(M, T, N = 100, model, drift.random, diffusion.random, mixtu
             # simulation of the series
             if (model == "OU") {
                 for (j in 1:M) {
-                  if (invariant == 1) {
-                    X0 <- phi[1, j]/phi[2, j] + (psi[j]/(sqrt(2 * phi[2, j]))) * rnorm(1)
                     suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
                       method = "EA", theta = c(phi[, j], psi[j]), model = "OU"))
-                  }
-                  if (invariant == 0) {
-                    suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
-                      method = "EA", theta = c(phi[, j], psi[j]), model = "OU"))
-                  }
                 }
             }
             
@@ -297,15 +284,8 @@ msde.sim <- function(M, T, N = 100, model, drift.random, diffusion.random, mixtu
             # simulation of the series
             if (model == "OU") {
                 for (j in 1:M) {
-                  if (invariant == 1) {
-                    X0 <- phi[j]/drift.fixed + (psi[j]/(sqrt(2 * drift.fixed))) * rnorm(1)
                     suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
-                      method = "EA", theta = c(phi[j], drift.fixed, psi[j]), model = "OU"))
-                  }
-                  if (invariant == 0) {
-                    suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
-                      method = "EA", theta = c(phi[j], drift.fixed, psi[j]), model = "OU"))
-                  }
+                      method = "EA", theta = c(phi[j], drift.param[3], psi[j]), model = "OU"))
                 }
             }
             
@@ -322,7 +302,7 @@ msde.sim <- function(M, T, N = 100, model, drift.random, diffusion.random, mixtu
             phi <- rep(0, M)
             if (mixture == 0) {
                 for (j in 1:M) {
-                  phi[j] <- drift.param[1] + drift.param[2] * psi[j] * rnorm(1, mean = 0, 
+                  phi[j] <- drift.param[2] + drift.param[3] * psi[j] * rnorm(1, mean = 0, 
                     sd = 1)
                 }
             }
@@ -330,36 +310,16 @@ msde.sim <- function(M, T, N = 100, model, drift.random, diffusion.random, mixtu
             # simulation of the series
             if (model == "OU") {
                 for (j in 1:M) {
-                  if (invariant == 1) {
-                    X0 <- (psi[j]/(sqrt(2 * phi[j]))) * rnorm(1)
                     suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
-                      method = "EA", theta = c(drift.fixed, phi[j], psi[j]), model = "OU"))
-                  }
-                  if (invariant == 0) {
-                    suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
-                      method = "EA", theta = c(drift.fixed, phi[j], psi[j]), model = "OU"))
-                  }
+                      method = "EA", theta = c(drift.param[1], phi[j], psi[j]), model = "OU"))
                 }
             }
             
             if (model == "CIR") {
                 for (j in 1:M) {
-                  if (invariant == 0) {
                     suppressMessages(X[j, ] <- sde.sim(t0, T, X0, N, delta, method = "milstein", 
-                      theta = c(drift.fixed, phi[j], psi[j]), sigma.x = expression(psi[j]/(2 * 
+                      theta = c(drift.param[1], phi[j], psi[j]), sigma.x = expression(psi[j]/(2 * 
                         sqrt(x))), sigma = expression(psi[j] * sqrt(x)), model = "CIR"))
-                  }
-                  if (invariant == 1) {
-                    if (drift.fixed == 0) {
-                      message("no invariant distribution, please fix X0")
-                    }
-                    if (drift.fixed != 0) {
-                      X0 <- rgamma(1, 2 * drift.fixed/psi[j]^2, scale = psi[j]^2/(2 * phi[j]))
-                      suppressMessages(X[j, ] <- sde.sim(t0 = t0, T = T, X0 = X0, N, delta = delta, 
-                        method = "milstein", theta = c(drift.fixed, phi[j], psi[j]), sigma.x = expression(psi[j]/(2 * 
-                          sqrt(x))), sigma = expression(psi[j] * sqrt(x)), model = "CIR"))
-                    }
-                  }
                 }
                 
             }
@@ -369,40 +329,17 @@ msde.sim <- function(M, T, N = 100, model, drift.random, diffusion.random, mixtu
             # simulation of the series
             if (model == "OU") {
                 for (j in 1:M) {
-                  if (invariant == 1) {
-                    X0 <- (psi[j]/(sqrt(2 * drift.fixed[2]))) * rnorm(1)
                     suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
-                      method = "EA", theta = c(drift.fixed[1], drift.fixed[2], psi[j]), 
+                      method = "EA", theta = c(drift.param[1], drift.param[2], psi[j]), 
                       model = "OU"))
-                  }
-                  if (invariant == 0) {
-                    suppressMessages(X[j, ] <- sde.sim(T = T, X0 = X0, N = N, delta = delta, 
-                      method = "EA", theta = c(drift.fixed[1], drift.fixed[2], psi[j]), 
-                      model = "OU"))
-                  }
                 }
             }
             
             if (model == "CIR") {
                 for (j in 1:M) {
-                  if (invariant == 0) {
                     suppressMessages(X[j, ] <- sde.sim(t0, T, X0, N, delta, method = "milstein", 
-                      theta = c(drift.fixed[1], drift.fixed[2], psi[j]), sigma.x = expression(psi[j]/(2 * 
+                      theta = c(drift.param[1], drift.param[2], psi[j]), sigma.x = expression(psi[j]/(2 * 
                         sqrt(x))), sigma = expression(psi[j] * sqrt(x)), model = "CIR"))
-                  }
-                  if (invariant == 1) {
-                    if (drift.fixed[2] == 0) {
-                      message("no invariant distribution, please fix X0")
-                    }
-                    if (drift.fixed[2] != 0) {
-                      X0 <- rgamma(1, 2 * drift.fixed[1]/psi[j]^2, scale = psi[j]^2/(2 * 
-                        drift.fixed[2]))
-                      suppressMessages(X[j, ] <- sde.sim(t0 = t0, T = T, X0 = X0, N, delta = delta, 
-                        method = "milstein", theta = c(drift.fixed[1], drift.fixed[2], 
-                          psi[j]), sigma.x = expression(psi[j]/(2 * sqrt(x))), sigma = expression(psi[j] * 
-                          sqrt(x)), model = "CIR"))
-                    }
-                  }
                 }
                 
             }

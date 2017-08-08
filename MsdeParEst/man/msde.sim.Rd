@@ -5,9 +5,8 @@
 \title{Simulation Of A Mixed Stochastic Differential Equation}
 \usage{
 msde.sim(M, T, N = 100, model, drift.random, diffusion.random, mixture = 0,
-  drift.fixed = 0, drift.param, diffusion.param, nb.mixt = 1,
-  mixt.prop = 1, t0 = 0, X0 = 0.01, invariant = 0, delta = T/N,
-  op.plot = 0, add.plot = FALSE)
+  drift.param, diffusion.param, nb.mixt = 1, mixt.prop = 1, t0 = 0,
+  X0 = 0.01, delta = T/N, op.plot = 0, add.plot = FALSE)
 }
 \arguments{
 \item{M}{number of trajectories.}
@@ -24,10 +23,9 @@ msde.sim(M, T, N = 100, model, drift.random, diffusion.random, mixture = 0,
 
 \item{mixture}{1 if the random effects in the drift follow a mixture of Normal distributions, 0 otherwise. Default to 0.}
 
-\item{drift.fixed}{fixed effects in the drift: value of the fixed effect when there is only one random effect, 0 otherwise. 
-If drift.random =2, fixed can be 0 but \eqn{\beta} has to be a non negative random variable for the estimation.}
-
-\item{drift.param}{vector (not mixture) or matrix (mixture) of parameters of the distribution of the random effects in the drift.}
+\item{drift.param}{fixed effects in the drift: value of the fixed effect when there is only one random effect, 0 otherwise. 
+If drift.random =2, fixed can be 0 but \eqn{\beta} has to be a non negative random variable for the estimation.
+vector (not mixture) or matrix (mixture) of parameters of the distribution of the random effects in the drift.}
 
 \item{diffusion.param}{diffusion parameter if the diffusion coefficient is fixed, vector of parameters of the distribution of the diffusion random effect otherwise.}
 
@@ -37,9 +35,7 @@ If drift.random =2, fixed can be 0 but \eqn{\beta} has to be a non negative rand
 
 \item{t0}{time origin, default 0.}
 
-\item{X0}{initial value of the process, default X0=0.}
-
-\item{invariant}{1 if the initial value is simulated from the invariant distribution, default 0.01 and X0 is fixed.}
+\item{X0}{initial value of the process, default X0=0.001.}
 
 \item{delta}{time step of the simulation (T/N).}
 

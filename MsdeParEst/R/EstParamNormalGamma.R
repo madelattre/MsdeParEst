@@ -12,8 +12,7 @@
 #' @param SigDelta vector of the M constant terms of the individual likelihood (see \code{\link{UVS}}). 
 #' @param K number of times of observations.
 #' @param drift.random random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects.
-#' @param drift.fixed value of the fixed effect in the drift if it is not estimated. Default to 0.
-#' @param estim.drift.fix 1 if the fixed effect in the drift is estimated, 0 otherwise. Default to 0.
+#' @param drift.fixed NULL if the fixed effect(s) in the drift is (are) estimated, value of the fixed effect(s) otherwise. Default to NULL.
 #' @return
 #' \item{mu}{estimated value of the mean of the Normal distribution}
 #' \item{omega}{estimated value of the standard deviation of the Normal distribution}
@@ -27,8 +26,7 @@
 #' Estimaton of the joint distribution of random effects for a discretely observed diffusion with random effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint}, hal-01446063.
 
 
-EstParamNormalGamma <- function(U, V, S, SigDelta, K, drift.random, drift.fixed = 0, 
-    estim.drift.fix = 0) {
+EstParamNormalGamma <- function(U, V, S, SigDelta, K, drift.random, drift.fixed = NULL) {
     
     M <- length(S)
     
@@ -75,7 +73,7 @@ EstParamNormalGamma <- function(U, V, S, SigDelta, K, drift.random, drift.fixed 
             12
     }
     
-    if (estim.drift.fix == 1) {
+    if (is.null(drift.fixed)) {
         
         if (sum(drift.random) == 1) {
             
@@ -121,7 +119,7 @@ EstParamNormalGamma <- function(U, V, S, SigDelta, K, drift.random, drift.fixed 
         
     }
     
-    if (estim.drift.fix == 0) {
+    if (!is.null(drift.fixed)) {
         
         if (sum(drift.random) == 1) {
             

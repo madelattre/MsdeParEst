@@ -5,9 +5,8 @@
 \title{EM algorithm for mixtures of stochastic differential equations with random effects in the drift and
 a fixed effect in the diffusion coefficient}
 \usage{
-EM(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = 0,
-  drift.estim.fixed = 1, drift.fixed.mixt = 1, sigma = 1,
-  sigma.estim = 1)
+EM(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = NULL,
+  sigma = NULL)
 }
 \arguments{
 \item{U}{matrix of M sufficient statistics U (see \code{\link{UVS}}).}
@@ -29,16 +28,9 @@ N x 2 matrix, the components corresponding to a fixed effect should be set to 0.
 
 \item{Niter}{number of iterations. Defaults to 10.}
 
-\item{drift.fixed}{value for the fixed effects in the drift if known (not estimated). Vector of length N. Defaults to 0.}
+\item{drift.fixed}{NULL if the fixed effects in the drift are estimated, vector of the N values of the fixed effect otherwise. Default to NULL.}
 
-\item{drift.estim.fixed}{1 if the fixed effects in the drift are estimated, 0 otherwise. Defaults to 1.}
-
-\item{drift.fixed.mixt}{1 if the value of the fixed effect in the drift is different from one mixture component to
-another, 0 otherwise. Defaults to 1.}
-
-\item{sigma}{value for the diffusion parameter if known (not estimated). Defaults to 1.}
-
-\item{sigma.estim}{1 if the diffusion parameter is estimated, 0 otherwise. Defaults to 1.}
+\item{sigma}{value for the diffusion parameter if known (not estimated), NULL otherwise. Defaults to NULL.}
 }
 \value{
 \item{mu}{estimated value of the mean at each iteration of the algorithm. Niter x N x 2 array. }
