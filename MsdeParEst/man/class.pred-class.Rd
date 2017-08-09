@@ -10,10 +10,12 @@ S4 class for the estimation results in the mixed SDE with random effects in the 
 \section{Slots}{
 
 \describe{
-\item{\code{res}}{character 'OU' or 'CIR'}
+\item{\code{estim}}{object of class Fit.class containing the results of the model estimation}
 
-\item{\code{phipred}}{numeric 1, 2, or c(1,2)}
+\item{\code{phipred}}{matrix of simulated values for the random effects in the drift that are used for prediction (dimensions)}
 
-\item{\code{idexpred}}{matrix of values on which the estimation of the density of the random effects is done}
+\item{\code{Xpred}}{matrix of simulated trajectories used for prediction (dimensions)}
+
+\item{\code{idexpred}}{vector of indexes of the true trajectories that are used for prediction}
 }}
 

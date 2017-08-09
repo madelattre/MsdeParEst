@@ -1,3 +1,8 @@
+# MsdeParEst R package ; file discr.r (last modified: 2017-08-09)
+# Authors: M. Delattre, C. Dion
+# Copyright INRA 2017
+# UMR 518 AgroParisTech/INRA, 16 rue Claude Bernard, 75 231 Paris Cedex 05
+
 #' Simulation Of Random Variables
 #' 
 #' @description Simulation of (discrete) random variables from a vector of probability (the nonparametrically estimated values

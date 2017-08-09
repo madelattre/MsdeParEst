@@ -1,3 +1,9 @@
+# MsdeParEst R package ; file msde.fit.r (last modified: 2017-08-09)
+# Authors: M. Delattre, C. Dion
+# Copyright INRA 2017
+# UMR 518 AgroParisTech/INRA, 16 rue Claude Bernard, 75 231 Paris Cedex 05
+
+
 #' Estimation Of The Random Effects In Mixed Stochastic Differential Equations
 #' 
 #' 
@@ -8,7 +14,7 @@
 #' @param times vector of observation times
 #' @param X matrix of the M trajectories (each row is a trajectory with as much columns as observations)
 #' @param model name of the SDE: 'OU' (Ornstein-Uhlenbeck) or 'CIR' (Cox-Ingersoll-Ross)
-#' @param drift.random random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects
+#' @param drift.random random effects in the drift: 0 if only fixed effects, 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects. Defaults to c(1,2).
 #' @param drift.fixed NULL if the fixed effect(s) in the drift is (are) estimated, value of the fixed effect(s) otherwise. Default to NULL
 #' @param diffusion.random default 0, 1 if one random effect in the diffusion, 0 if there is no random effect in the diffusion
 #' @param diffusion.fixed NULL if the fixed effect in the diffusion is estimated, value of the fixed effect otherwise. Default to NULL
@@ -255,11 +261,12 @@
 #' Estimation of the joint distribution of random effects for a discretely observed diffusion with random effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01446063 2017}
 
 
-msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed = NULL, 
+msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random = c(1,2), drift.fixed = NULL, 
     diffusion.random = 0, diffusion.fixed = NULL, mixture = 0, nb.mixt = 1,  
     Niter = 10, discrete = 1) {
     model <- match.arg(model)
-    # mixture <- match.arg(mixture)
+    
+    if((model != 'OU')&(model != 'CIR')){stop("A model must be precised: OU or CIR")}
     
     if (is.matrix(X)) {
         if (nrow(X) == length(times)) {
@@ -285,12 +292,13 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed
         omega <- 0
         sigma2 <- 0
         
-        gridf <- 0
+        gridf <- as.matrix(0)
+        estimf <- as.matrix(0)
         
-        estimg <- 0
-        gridg <- 0
-        estimf <- 0
-        
+        estimg <- as.matrix(0)
+        gridg <- as.matrix(0)
+
+        estimphi <- as.matrix(0)
         
         if (model == "OU") {
             Mindex <- M
@@ -375,26 +383,17 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed
                 mu <- res$mu
                 omega <- res$omega
                 sigma2 <- res$sigma^2
-                
-                
-                gridg <- as.matrix(gridg)
-                estimg <- as.matrix(estimg)
-                
+
                 # -- Estimator of the density
                 
                 estimpsi2 <- matrix(estimpsi2, 1, length(estimpsi2), byrow = TRUE)
                 
                 if (sum(drift.random) == 3) {
                   
-                  if (is.null(gridf) == 1) {
                     gridf <- matrix(0, 2, 500)
                     gridf[1, ] <- seq(mu[1] - 3 * omega[1], mu[1] + 3 * omega[1], length = 500)
                     gridf[2, ] <- seq(mu[2] - 3 * omega[2], mu[2] + 3 * omega[2], length = 500)
-                  }
-                  
-                  if (is.null(gridf) == 0) {
-                    gridf <- gridf
-                  }
+
                   
                   estimf1 <- dnorm(gridf[1, ], mean = mu[1], sd = abs(omega[1]))
                   estimf2 <- dnorm(gridf[2, ], mean = mu[2], sd = abs(omega[2]))
@@ -407,13 +406,9 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed
                   
                   estimphi <- estimphi[2, ]
                   
-                  if (is.null(gridf) == 1) {
+
                     gridf <- seq(mu[2] - 3 * omega[2], mu[2] + 3 * omega[2], length = 500)
-                  }
-                  
-                  if (is.null(gridf) == 0) {
-                    gridf <- gridf
-                  }
+
                   
                   estimf <- matrix(dnorm(gridf, mean = mu[2], sd = omega[2]), 1, length(gridf), byrow = TRUE)
                   gridf <- matrix(gridf, 1, length(gridf), byrow = TRUE)
@@ -425,14 +420,8 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed
                   
                   estimphi <- estimphi[1, ]
                   
-                  if (is.null(gridf) == 1) {
                     gridf <- seq(mu[1] - 3 * omega[1], mu[1] + 3 * omega[1], length = 500)
-                  }
-                  
-                  if (is.null(gridf) == 0) {
-                    gridf <- gridf
-                  }
-                  
+
                   estimf <- matrix(dnorm(gridf, mean = mu[1], sd = omega[1]), 1, length(gridf), byrow = TRUE)
                   gridf <- matrix(gridf, 1, length(gridf), byrow = TRUE)
                   estimphi <- matrix(estimphi, 1, length(estimphi), byrow = TRUE)
@@ -457,17 +446,9 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed
                 
                 
                 # Estimator of the density
-                
-                estimphi <- 0
-                
-                if (is.null(gridg) == 1) {
-                  gridg <- seq(min(estimpsi2) * 0.8, max(estimpsi2) * 1.2, length = 500)
-                }
-                
-                if (is.null(gridg) == 0) {
-                  gridg <- gridg
-                }
-                
+
+                gridg <- seq(min(estimpsi2) * 0.8, max(estimpsi2) * 1.2, length = 500)
+           
                 simupsi2 <- 1/rgamma(500, a, rate = 1/lambda)
                 
                 testpsi <- suppressMessages(density(simupsi2, from = min(simupsi2), to = max(simupsi2), bw = "ucv", 
@@ -481,9 +462,7 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed
                 gridg <- matrix(gridg, nrow = 1)
                 
                 estimpsi2 <- matrix(estimpsi2, 1, length(estimpsi2), byrow = TRUE)
-                gridf <- matrix(gridf, 1, length(gridf), byrow = TRUE)
-                estimf <- matrix(estimf, 1, length(estimf), byrow = TRUE)
-                estimphi <- matrix(estimphi, 1, length(estimphi), byrow = TRUE)
+
             }
             
             if (((sum(drift.random)) >= 1) && (diffusion.random == 1)) {
@@ -737,17 +716,12 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed
         
         if (sum(drift.random) == 3) {
             
-            if (is.null(gridf) == 1) {
                 gridf <- matrix(0, 2, 500)
                 bg1 <- max(abs(estimphi[1, ])) * 1.2
                 bg2 <- max(abs(estimphi[2, ])) * 1.2
                 gridf[1, ] <- seq(min(abs(estimphi[1, ])) * 0.8, max(abs(estimphi[1, ])) * 1.2, length = 500)
                 gridf[2, ] <- seq(min(abs(estimphi[2, ])) * 0.8, max(abs(estimphi[2, ])) * 1.2, length = 500)
-            }
-            
-            if (is.null(gridf) == 0) {
-                gridf <- gridf
-            }
+
             
             estimf1 <- rep(0, length(gridf[1, ]), byrow = TRUE)
             estimf2 <- rep(0, length(gridf[2, ]), byrow = TRUE)
@@ -763,14 +737,9 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed
         
         if (sum(drift.random) == 1) {
             
-            if (is.null(gridf) == 1) {
                 gridf <- matrix(0, 2, 500)
                 gridf <- seq(min(abs(estimphi[1, ])) * 0.8, max(abs(estimphi[1, ])) * 1.2, length = 500)
-            }
-            
-            if (is.null(gridf) == 0) {
-                gridf <- gridf
-            }
+
             
             estimf <- rep(0, length(gridf), byrow = TRUE)
             
@@ -785,14 +754,9 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed
         
         if (sum(drift.random) == 2) {
             
-            if (is.null(gridf) == 1) {
                 gridf <- matrix(0, 2, 500)
                 gridf <- seq(min(abs(estimphi[2, ])) * 0.8, max(abs(estimphi[2, ])) * 1.2, length = 500)
-            }
-            
-            if (is.null(gridf) == 0) {
-                gridf <- gridf
-            }
+
             
             estimf <- rep(0, length(gridf), byrow = TRUE)
             
@@ -905,7 +869,7 @@ out <- function(x) {
 #'
 setMethod(f = "summary", signature = "Fit.class", definition = function(object) {
     
-    cat(c("Number of trajectories: ",length(object@index),"\n"))
+    cat(c("Number of trajectories used for estimation: ",length(object@index),"\n"))
   
     if (sum(object@drift.random) > 2) {
         
@@ -1038,7 +1002,7 @@ setMethod(f = "summary", signature = "Fit.class", definition = function(object) 
 #'
 setMethod("summary", "Mixture.fit.class", function(object) {
     
-    cat(c("Number of trajectories: ",length(object@index),"\n"))
+    cat(c("Number of trajectories used for estimation: ",length(object@index),"\n"))
   
     cat(c("Number of iterations of the EM algorithm", dim(object@mixt.prop)[1], "\n"))
   
@@ -1150,16 +1114,20 @@ setMethod(f = "plot", signature = "Fit.class", definition = function(x, newwindo
             
             op <- par(mfrow = c(1, 1), mar = c(2.8, 2.8, 2, 2), mgp = c(1.5, 0.5, 0), oma = c(1, 1, 1, 1), omi = c(0.2, 
                 0.2, 0.2, 0.2), cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
-            plot(x@gridf, x@estimf, main = "Estimated density of the random effect", xlab = "Value", ylab = "Density", type = "l")
-            
+            if (x@drift.random==1){
+              plot(x@gridf, x@estimf, main = expression(alpha[j]), xlab = "Value", ylab = "Density", type = "l")
+            }
+            if (x@drift.random==2){
+              plot(x@gridf, x@estimf, main = expression(beta[j]), xlab = "Value", ylab = "Density", type = "l")
+            }    
         }
         
         if (dim(x@gridf)[1] == 2) {
             
             op <- par(mfrow = c(2, 2), mar = c(2.8, 2.8, 2, 2), mgp = c(1.5, 0.5, 0), oma = c(1, 1, 1, 1), omi = c(0.2, 
                 0.2, 0.2, 0.2), cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
-            plot(x@gridf[1, ], x@estimf[1, ], main = "First random effect", xlab = "Value", ylab = "Density", type = "l")
-            plot(x@gridf[2, ], x@estimf[2, ], main = "Second random effect", xlab = "Value", ylab = "Density", type = "l")
+            plot(x@gridf[1, ], x@estimf[1, ], main = expression(alpha[j]), xlab = "Value", ylab = "Density", type = "l")
+            plot(x@gridf[2, ], x@estimf[2, ], main = expression(beta[j]), xlab = "Value", ylab = "Density", type = "l")
             title("Estimated densities", outer = TRUE)
             
         }
@@ -1171,21 +1139,36 @@ setMethod(f = "plot", signature = "Fit.class", definition = function(x, newwindo
         # 'Estimated density of the random effect in the diffusion',xlab='Value',ylab='Density') }
         
         if (dim(x@gridf)[1] == 1) {
+          
+          if (dim(x@gridf)[2] == 1) {
+            
+            op <- par(mfrow = c(1, 1), mar = c(2.8, 2.8, 2, 2), mgp = c(1.5, 0.5, 0), oma = c(1, 1, 1, 1), omi = c(0.2, 
+                                                                                                                   0.2, 0.2, 0.2), cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+            plot(x@gridg, x@estimg, main = expression(sigma[j]), xlab = "Value", ylab = "Density", type = "l")
+            title("Estimated density", outer = TRUE)
+            #"Random effect in the diffusion"
+          } else {
             
             op <- par(mfrow = c(1, 2), mar = c(2.8, 2.8, 2, 2), mgp = c(1.5, 0.5, 0), oma = c(1, 1, 1, 1), omi = c(0.2, 
                 0.2, 0.2, 0.2), cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
-            plot(x@gridf, x@estimf, main = "Random effect in the drift", xlab = "Value", ylab = "Density", type = "l")
-            plot(x@gridg, x@estimg, main = "Random effect in the diffusion", xlab = "Value", ylab = "Density", type = "l")
+            if (x@drift.random==1){
+              plot(x@gridf, x@estimf, main = expression(alpha[j]), xlab = "Value", ylab = "Density", type = "l")
+            }
+            if (x@drift.random==2){
+              plot(x@gridf, x@estimf, main = expression(beta[j]), xlab = "Value", ylab = "Density", type = "l")
+            }
+            plot(x@gridg, x@estimg, main = expression(sigma[j]), xlab = "Value", ylab = "Density", type = "l")
             title("Estimated densities", outer = TRUE)
+          }
         }
         
         if (dim(x@gridf)[1] == 2) {
             
             op <- par(mfrow = c(2, 2), mar = c(2.8, 2.8, 2, 2), mgp = c(1.5, 0.5, 0), oma = c(1, 1, 1, 1), omi = c(0.2, 
                 0.2, 0.2, 0.2), cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
-            plot(x@gridf[1, ], x@estimf[1, ], main = "First drift random effect", xlab = "Value", ylab = "Density", type = "l")
-            plot(x@gridf[2, ], x@estimf[2, ], main = "Second drift random effect", xlab = "Value", ylab = "Density", type = "l")
-            plot(x@gridg, x@estimg, main = "Random effect in the diffusion", xlab = "Value", ylab = "Density", type = "l")
+            plot(x@gridf[1, ], x@estimf[1, ], main = expression(alpha[j]), xlab = "Value", ylab = "Density", type = "l")
+            plot(x@gridf[2, ], x@estimf[2, ], main = expression(beta[j]), xlab = "Value", ylab = "Density", type = "l")
+            plot(x@gridg, x@estimg, main = expression(sigma[j]), xlab = "Value", ylab = "Density", type = "l")
             title("Estimated densities", outer = TRUE)
             
         }
@@ -1247,9 +1230,9 @@ setMethod(f = "plot", signature = "Mixture.fit.class", definition = function(x, 
         
         
         plot(x@gridf[1, ], x@estimf[1, ], ylab = "Density", xlab = "value", type = "l")
-        title("First random effect")
+        title(expression(alpha[j]))
         plot(x@gridf[2, ], x@estimf[2, ], ylab = "Density", xlab = "value", type = "l")
-        title("Second random effect")
+        title(expression(beta[j]))
         title("Estimated densities", outer = TRUE)
     }
     
@@ -1259,7 +1242,14 @@ setMethod(f = "plot", signature = "Mixture.fit.class", definition = function(x, 
         
         
         plot(x@gridf, x@estimf, ylab = "Density", xlab = "value", type = "l")
-        title("Estimated density", outer = TRUE)
+        
+        if (x@drift.random==1){
+          title(expression(alpha[j]), outer = TRUE)
+        }
+        if (x@drift.random==2){
+          title(expression(beta[j]), outer = TRUE)
+        }
+        
     }
     
 })

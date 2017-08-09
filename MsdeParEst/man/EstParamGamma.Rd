@@ -4,7 +4,7 @@
 \alias{EstParamGamma}
 \title{Estimation In Mixed Stochastic Differential Equations with fixed effects in the drift and one random effect in the diffusion coefficient}
 \usage{
-EstParamGamma(U, V, S, SigDelta, K, drift.param = c(0, 0), drift.estim = 1)
+EstParamGamma(U, V, S, SigDelta, K, drift.param = NULL)
 }
 \arguments{
 \item{U}{matrix of M sufficient statistics U (see \code{\link{UVS}}).}
@@ -17,9 +17,7 @@ EstParamGamma(U, V, S, SigDelta, K, drift.param = c(0, 0), drift.estim = 1)
 
 \item{K}{number of times of observations.}
 
-\item{drift.param}{values of the fixed effects in the drift. Defaults to c(0,0).}
-
-\item{drift.estim}{1 if the fixed effects in the drift are estimated, 0 otherwise. Defaults to 1.}
+\item{drift.param}{values of the fixed effects in the drift if know, NULL if the fixed effects are estimated. Defaults to NULL.}
 }
 \value{
 \item{mu}{values of the fixed effects in the drift.}

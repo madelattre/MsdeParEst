@@ -1,3 +1,8 @@
+# MsdeParEst R package ; file likelihoodNormalGamma.r (last modified: 2017-08-09)
+# Authors: M. Delattre, C. Dion
+# Copyright INRA 2017
+# UMR 518 AgroParisTech/INRA, 16 rue Claude Bernard, 75 231 Paris Cedex 05
+
 #' Computation Of The Log Likelihood of the Euer scheme in Mixed Stochastic Differential Equations with random effects in the drift and in the diffusion.
 #' 
 #' @description Computation of -2 log-likelihood of the Euler scheme the mixed SDE 

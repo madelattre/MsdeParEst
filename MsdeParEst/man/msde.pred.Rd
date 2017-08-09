@@ -5,9 +5,8 @@
 \title{Prediction Of Mixed Stochastic Differential Equations Trajectories}
 \usage{
 msde.pred(times, X, model = c("OU", "CIR"), drift.random,
-  drift.fixed = NULL, estim.drift.fix = 0, diffusion.random = 0,
-  diffusion.fixed = NULL, estim.diffusion.fix = 0, mixture = 0,
-  nb.mixt = 1, drift.fixed.mixed = 0, Niter = 10, discrete = 1,
+  drift.fixed = NULL, diffusion.random = 0, diffusion.fixed = NULL,
+  mixture = 0, nb.mixt = 1, Niter = 10, discrete = 1,
   plot.pred = TRUE, level = 0.05, newwindow = FALSE)
 }
 \arguments{
@@ -21,20 +20,13 @@ msde.pred(times, X, model = c("OU", "CIR"), drift.random,
 
 \item{drift.fixed}{default NULL, fixed effect in the drift: value of the fixed effect when there is only one random effect and it is not estimated, NULL otherwise}
 
-\item{estim.drift.fix}{default 0, 1 if the fixed effect in the drift is estimated, 0 if the fixed effect in the drift is known}
-
 \item{diffusion.random}{default 0, 1 if one random effect in the diffusion, 0 if there is no random effect in the diffusion}
 
 \item{diffusion.fixed}{default NULL, fixed effect in the diffusion: value of the fixed effect when there is no random effect in the diffusion and it is not estimated, NULL otherwise}
 
-\item{estim.diffusion.fix}{default 0, 1 if the fixed effect in the diffusion is estimated, 0 otherwise}
-
 \item{mixture}{1 if the random effects in the drift follow a mixture distribution, 0 otherwise. Default to 0.}
 
 \item{nb.mixt}{default 1, number of mixture components for the distribution of the random effects in the drift}
-
-\item{drift.fixed.mixed}{default 1, 1 if the value of the fixed effect in the drift is different from one mixture component to
-another, 0 otherwise.}
 
 \item{Niter}{default 10, number of iterations for the EM algorithm if mixture = 1}
 
@@ -65,57 +57,6 @@ The plot reflect the adequation between the last third of the data and the simul
 
 \dontrun{
 # Example 1: one random effect in the drift and one random effect in the diffusion coefficient.
-
-# -- Simulation
-M <- 100
-Tmax <- 5
-N <- 5000
-model <- 'OU'
-drift.random <- 2
-diffusion.random <- 1
-drift.fixed <- 0
-drift.param <- c(0.5,0.5)
-diffusion.param <- c(8,1/2)
-
-sim1 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random, 
-diffusion.random = diffusion.random, drift.fixed = drift.fixed, 
-mixture = 0, drift.param = drift.param, diffusion.param = diffusion.param)
-                 
-
-pred1 <- pred( times = sim1$times, X = sim1$X, model = model, drift.random = drift.random,
-              estim.drift.fix = estim.drift.fix, diffusion.random = diffusion.random, 
-              estim.diffusion.fix = estim.diffusion.fix,level = 0.05)
-
-
-
-# Example 5: one fixed effect and one mixture random effect in the drift, and one fixed effect in 
-# the diffusion coefficient
-
-# -- Simulation
-M <- 100
-Tmax <- 5
-N <- 5000
-diffusion.random <- 0
-diffusion.param <- 0.1
-model <- 'OU'
-drift.random <- 1
-drift.fixed <- 1
-nb.mixt <- 2
-mixt.prop <- c(0.5,0.5)
-param.ea1 <- c(0.5, 0.25, 1.8, 0.25)
-param.ea2 <- c(1, 0.25, 1, 0.25) 
-drift.param <- param.ea1
-
-sim5 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random,
-                 diffusion.random = diffusion.random, drift.fixed = drift.fixed,
-                 mixture=1, drift.param = drift.param,
-                 diffusion.param = diffusion.param, nb.mixt = nb.mixt, mixt.prop = mixt.prop)
-
-
-res5 <- msde.pred(times = sim5$times, X = sim5$X, model = model, drift.random = drift.random,
-                  estim.drift.fix = estim.drift.fix, diffusion.random = diffusion.random, estim.diffusion.fix = estim.diffusion.fix,
-                  mixture = mixture, nb.mixt=nb.mixt, Niter = Niter)
-
   }
 
 }

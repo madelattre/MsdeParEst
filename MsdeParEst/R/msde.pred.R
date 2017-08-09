@@ -1,3 +1,8 @@
+# MsdeParEst R package ; file msde.pred.r (last modified: 2017-08-09)
+# Authors: M. Delattre, C. Dion
+# Copyright INRA 2017
+# UMR 518 AgroParisTech/INRA, 16 rue Claude Bernard, 75 231 Paris Cedex 05
+
 
 #' Prediction Of Mixed Stochastic Differential Equations Trajectories
 #' 
@@ -15,14 +20,10 @@
 #' @param model name of the SDE: 'OU' (Ornstein-Uhlenbeck) or 'CIR' (Cox-Ingersoll-Ross)
 #' @param drift.random random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects
 #' @param drift.fixed default NULL, fixed effect in the drift: value of the fixed effect when there is only one random effect and it is not estimated, NULL otherwise
-#' @param estim.drift.fix default 0, 1 if the fixed effect in the drift is estimated, 0 if the fixed effect in the drift is known
 #' @param diffusion.random default 0, 1 if one random effect in the diffusion, 0 if there is no random effect in the diffusion
 #' @param diffusion.fixed default NULL, fixed effect in the diffusion: value of the fixed effect when there is no random effect in the diffusion and it is not estimated, NULL otherwise
-#' @param estim.diffusion.fix default 0, 1 if the fixed effect in the diffusion is estimated, 0 otherwise
 #' @param mixture 1 if the random effects in the drift follow a mixture distribution, 0 otherwise. Default to 0.
 #' @param nb.mixt default 1, number of mixture components for the distribution of the random effects in the drift 
-#' @param drift.fixed.mixed default 1, 1 if the value of the fixed effect in the drift is different from one mixture component to
-#' another, 0 otherwise. 
 #' @param Niter default 10, number of iterations for the EM algorithm if mixture = 1
 #' @param discrete default 1, 1 for discrete observations, 0 otherwise. If discrete = 0, and diffusion.random = 0, the exact likelihood associated with continuous observations is 
 #' discretized. If discrete = 1, the likelihood of the Euler scheme of the mixed SDE is computed. 
@@ -41,69 +42,20 @@
 #' @importFrom stats dnorm
 #' @importFrom stats rgamma
 #' @importFrom stats density
+#' @importFrom stats quantile
 #' @importFrom methods new
 #' @importFrom methods slot
 #' @importFrom methods slotNames
 #' @importFrom stats kmeans
 #' @importFrom stats sd
 #' @importFrom graphics lines
-#' @importFrom grDevices x11
+#' @importFrom grDevices dev.new
 #' 
 #' @examples
 #'
 #' \dontrun{
 #' # Example 1: one random effect in the drift and one random effect in the diffusion coefficient.
-#' 
-#' # -- Simulation
-#' M <- 100
-#' Tmax <- 5
-#' N <- 5000
-#' model <- 'OU'
-#' drift.random <- 2
-#' diffusion.random <- 1
-#' drift.fixed <- 0
-#' drift.param <- c(0.5,0.5)
-#' diffusion.param <- c(8,1/2)
-#'
-#' sim1 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random, 
-#' diffusion.random = diffusion.random, drift.fixed = drift.fixed, 
-#' mixture = 0, drift.param = drift.param, diffusion.param = diffusion.param)
-#'                  
-#' 
-#' pred1 <- pred( times = sim1$times, X = sim1$X, model = model, drift.random = drift.random,
-#'               estim.drift.fix = estim.drift.fix, diffusion.random = diffusion.random, 
-#'               estim.diffusion.fix = estim.diffusion.fix,level = 0.05)
-#'
-#' 
-#' 
-#' # Example 5: one fixed effect and one mixture random effect in the drift, and one fixed effect in 
-#' # the diffusion coefficient
-#' 
-#' # -- Simulation
-#' M <- 100
-#' Tmax <- 5
-#' N <- 5000
-#' diffusion.random <- 0
-#' diffusion.param <- 0.1
-#' model <- 'OU'
-#' drift.random <- 1
-#' drift.fixed <- 1
-#' nb.mixt <- 2
-#' mixt.prop <- c(0.5,0.5)
-#' param.ea1 <- c(0.5, 0.25, 1.8, 0.25)
-#' param.ea2 <- c(1, 0.25, 1, 0.25) 
-#' drift.param <- param.ea1
-#' 
-#' sim5 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random,
-#'                  diffusion.random = diffusion.random, drift.fixed = drift.fixed,
-#'                  mixture=1, drift.param = drift.param,
-#'                  diffusion.param = diffusion.param, nb.mixt = nb.mixt, mixt.prop = mixt.prop)
-#'
-#' 
-#' res5 <- msde.pred(times = sim5$times, X = sim5$X, model = model, drift.random = drift.random,
-#'                   estim.drift.fix = estim.drift.fix, diffusion.random = diffusion.random, estim.diffusion.fix = estim.diffusion.fix,
-#'                   mixture = mixture, nb.mixt=nb.mixt, Niter = Niter)
-#' 
+
 #'   }
 #' 
 #' @keywords estimation
@@ -119,13 +71,15 @@
 #' Estimation of the joint distribution of random effects for a discretely observed diffusion with random effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01446063 2017}
 
 
-msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed = NULL, estim.drift.fix = 0, 
-    diffusion.random = 0, diffusion.fixed = NULL, estim.diffusion.fix = 0, mixture = 0, nb.mixt = 1, drift.fixed.mixed = 0, 
+msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixed = NULL, 
+    diffusion.random = 0, diffusion.fixed = NULL, mixture = 0, nb.mixt = 1,
     Niter = 10, discrete = 1, plot.pred = TRUE, level = 0.05, newwindow = FALSE) {
+  
     model <- match.arg(model)
     
     if (newwindow) {
-        x11(width = 10)
+         #x11(width = 10)
+      dev.new(width = 10)
     }
     if (is.matrix(X)) {
         if (nrow(X) == length(times)) {
@@ -153,9 +107,9 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
     N <- dim(X)[2] - 1
     
     Mpred <- floor(M * 2/3) + 1
-    Xtrue <- X[(Mpred + 1):M, ]
-    
-    Xestim <- X[1:Mpred, ]
+    ipred <- sample(seq(1,M,1),Mpred,replace=F)
+    Xtrue <- X[-ipred,]
+    Xestim <- X[ipred,]
     
     timestrue <- times
     Tend <- timestrue[length(timestrue)]
@@ -163,9 +117,11 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
     
     times <- seq(0, Tend, by = delta)
     
-    res <- msde.fit(times = times, X = Xestim, model = model, drift.random = drift.random, estim.drift.fix = estim.drift.fix, 
-        diffusion.random = diffusion.random, estim.diffusion.fix = estim.diffusion.fix, mixture = mixture, nb.mixt = nb.mixt, 
+    res <- msde.fit(times = times, X = Xestim, model = model, drift.random = drift.random, 
+        diffusion.random = diffusion.random, mixture = mixture, nb.mixt = nb.mixt, 
         Niter = Niter)
+
+    
     
     if (mixture == 1) {
         
@@ -183,19 +139,22 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
         if (sum(drift.random) != 3) {
             
             if (drift.random == 1) {
-                paramfixed <- res@mu[Niter, 1, 2]
+                paramfixed <- res@mu[Niter, , 2] 
                 
                 phipred <- rep(0, M - Mpred)
                 
-                phipred <- mixture.sim(M - Mpred, c(res@mu[Niter, 1, 1], res@omega[Niter, 2, 1], res@mu[Niter, 
-                  2, 1], res@omega[Niter, 1, 1]), res@mixt.prop[10, ])
-                # A VERIFIER
+                simu <- mixture.sim(M - Mpred, matrix(c(res@mu[Niter, , 1], res@omega[Niter, , 1]),nrow=2,byrow=F), 
+                                    res@mixt.prop[Niter, ])
                 
+                phipred <- simu$Y
+                index <- simu$index
+
                 if (model == "OU") {
                   indexpred <- 1:(M - Mpred)
+                  Xpred <- matrix(0, M - Mpred, N + 1)
                   for (j in 1:(M - Mpred)) {
                     suppressMessages(Xpred[j, ] <- sde.sim(T = Tend, X0 = Xtrue[j, 1], N = N, delta = Tend/N, 
-                      method = "EA", theta = c(phipred[j], paramfixed, sig), model = "OU"))
+                      method = "EA", theta = c(phipred[j], paramfixed[index[j]], sig), model = "OU"))
                   }
                 }
                 
@@ -208,7 +167,7 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                   for (j in 1:(M - Mpred)) {
                     
                     suppressMessages(Xpred[j, ] <- sde.sim(T = Tend, X0 = Xtrue[indexpred[j], 1], N = N, delta = Tend/N, 
-                      method = "milstein", theta = c(phipred[j], paramfixed, sig), model = "CIR", sigma.x = expression(sig/(2 * 
+                      method = "milstein", theta = c(phipred[j], paramfixed[indexpred[j]], sig), model = "CIR", sigma.x = expression(sig/(2 * 
                         sqrt(x))), sigma = expression(sig * sqrt(x))))
                     
                   }
@@ -217,13 +176,16 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
             }
             
             if (drift.random == 2) {
-                paramfixed <- res@mu[Niter, 1, 1]
+                paramfixed <- res@mu[Niter, , 1]
                 
                 phipred <- rep(0, M - Mpred)
-                phipred <- mixture.sim(M - Mpred, c(res@mu[Niter, 1, 2], res@omega[Niter, 2, 2], res@mu[Niter, 
-                  2, 2], res@omega[Niter, 1, 2]), res@mixt.prop[10, ])
                 
+                simu <- mixture.sim(M - Mpred, matrix(c(res@mu[Niter, , 2], res@omega[Niter, , 2])
+                                                      ,nrow=2,byrow=F), res@mixt.prop[Niter, ])
                 
+                phipred <- simu$Y
+                index <- simu$index
+
                 if (model == "OU") {
                   indexpred <- which(phipred > 0)
                   phipred <- phipred[indexpred]
@@ -233,7 +195,7 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                   for (j in 1:Mprednew) {
                     
                     suppressMessages(Xpred[j, ] <- sde.sim(T = Tend, X0 = Xtrue[j, 1], N = N, delta = Tend/N, 
-                      method = "EA", theta = c(paramfixed, phipred[j], sig), model = "OU"))
+                      method = "EA", theta = c(paramfixed[index[j]], phipred[j], sig), model = "OU"))
                   }
                 }
                 
@@ -246,7 +208,7 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                   for (j in 1:Mprednew) {
                     
                     suppressMessages(Xpred[j, ] <- sde.sim(T = Tend, X0 = Xtrue[indexpred[j], 1], N = N, delta = Tend/N, 
-                      method = "milstein", theta = c(paramfixed, phipred[j], sig), model = "CIR", sigma.x = expression(sig/(2 * 
+                      method = "milstein", theta = c(paramfixed[indexpred[j]], phipred[j], sig), model = "CIR", sigma.x = expression(sig/(2 * 
                         sqrt(x))), sigma = expression(sig * sqrt(x))))
                     
                   }
@@ -255,16 +217,9 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
             }
             
             if (plot.pred == TRUE) {
-                op <- par(mfrow = c(1, 3), mar = c(2, 2, 1.8, 1.8), mgp = c(1.5, 0.5, 0), oma = c(0, 0, 0, 0), 
+                op <- par(mfrow = c(1, 2), mar = c(2, 2, 1.8, 1.8), mgp = c(1.5, 0.5, 0), oma = c(0, 0, 0, 0), 
                   cex.main = 0.8, cex.lab = 0.7, cex.axis = 0.7)
-                
-                
-                plot(sort(res@estimphi[indexpred]), sort(phipred), pch = 18, xlim = c(min(res@estimphi[indexpred], 
-                  phipred) * 0.8, max(res@estimphi[indexpred], phipred) * 1.2), ylim = c(min(res@estimphi[indexpred], 
-                  phipred) * 0.8, max(res@estimphi[indexpred], phipred) * 1.2), ylab = "", xlab = "", main = "Random effect in the drift")
-                abline(0, 1)
-                
-                
+
                 plot(timestrue, Xtrue[indexpred[1], ], type = "l", xlab = "", ylab = "", ylim = c(min(Xtrue, Xpred) * 
                   0.8, max(Xtrue, Xpred) * 1.5), main = "True trajectories")
                 for (j in indexpred) {
@@ -272,7 +227,7 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                 }
                 
                 plot(times, Xpred[1, ], type = "l", xlab = "", ylab = "", ylim = c(min(Xtrue, Xpred) * 0.8, max(Xtrue, 
-                  Xpred) * 1.5), main = "Predictive trajectories")
+                  Xpred) * 1.5), main = "Predicted trajectories")
                 for (j in 1:length(indexpred)) {
                   lines(times, Xpred[j, ], col = 1)
                 }
@@ -290,15 +245,18 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
         }
         
         
-        if (drift.random == c(1, 2)) {
+        if (sum(drift.random) == 3) {
             
             phipred <- matrix(0, 2, M - Mpred)
             
-            phipred[1, ] <- mixture.sim(M - Mpred, c(res@mu[Niter, 1, 1], res@omega[Niter, 2, 1], res@mu[Niter, 
-                2, 1], res@omega[Niter, 1, 1]), res@mixt.prop[10, ])
+            param <- cbind(res@mu[Niter,,1],res@omega[Niter,,1])
             
-            phipred[2, ] <- mixture.sim(M - Mpred, c(res@mu[Niter, 1, 2], res@omega[Niter, 2, 2], res@mu[Niter, 
-                2, 2], res@omega[Niter, 1, 2]), res@mixt.prop[10, ])
+            for (k in 2:nb.mixt){
+              param <- cbind(param,res@mu[Niter,,k],res@omega[Niter,,k])
+            }
+            
+            
+            phipred <- mixture.sim(M - Mpred, param, res@mixt.prop[Niter, ])$Y
             
             if (model == "OU") {
                 indexpred <- which(phipred[2, ] > 0)
@@ -330,20 +288,9 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
             
             if (plot.pred == TRUE) {
                 
-                op <- par(mfrow = c(2, 2), mar = c(2, 2, 1.8, 1.8), mgp = c(1.5, 0.5, 0), oma = c(0, 0, 0, 0), 
+                op <- par(mfrow = c(1, 2), mar = c(2, 2, 1.8, 1.8), mgp = c(1.5, 0.5, 0), oma = c(0, 0, 0, 0), 
                   cex.main = 0.8, cex.lab = 0.7, cex.axis = 0.7)
-                
-                
-                plot(sort(res@estimphi[1, indexpred]), sort(phipred[1, ]), pch = 18, xlim = c(min(res@estimphi[1, 
-                  ], phipred[1, ]) * 0.8, max(res@estimphi[1, ], phipred[1, ]) * 1.2), ylim = c(min(res@estimphi[1, 
-                  ], phipred[1, ]) * 0.8, max(res@estimphi[1, ], phipred[1, ]) * 1.2), ylab = "", xlab = "", main = "First random effect in the drift")
-                abline(0, 1)
-                plot(sort(res@estimphi[2, indexpred]), sort(phipred[2, ]), pch = 18, xlim = c(min(res@estimphi[2, 
-                  ], phipred[2, ]) * 0.8, max(res@estimphi[2, ], phipred[2, ]) * 1.2), ylim = c(min(res@estimphi[2, 
-                  ], phipred[2, ]) * 0.8, max(res@estimphi[2, ], phipred[2, ]) * 1.2), ylab = "", xlab = "", main = "Second random effect in the drift")
-                abline(0, 1)
-                
-                
+             
                 plot(times, Xtrue[indexpred[1], ], type = "l", xlab = "", ylab = "", ylim = c(min(Xtrue, Xpred) * 
                   0.8, max(Xtrue, Xpred) * 1.5), main = "True trajectories")
                 for (j in indexpred) {
@@ -351,7 +298,7 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                 }
                 
                 plot(timestrue, Xpred[1, ], type = "l", xlab = "", ylab = "", ylim = c(min(Xtrue, Xpred) * 0.8, 
-                  max(Xtrue, Xpred) * 1.5), main = "Predictive trajectories")
+                  max(Xtrue, Xpred) * 1.5), main = "Predicted trajectories")
                 for (j in 1:length(indexpred)) {
                   lines(timestrue, Xpred[j, ], col = 1)
                 }
@@ -366,6 +313,8 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                 lines(timestrue, PI[2, ], col = "green", lwd = 2)
             }
         }
+        
+        return(new(Class = "class.mixture.pred", estim = res, phipred = as.matrix(phipred), Xpred = Xpred, indexpred = indexpred))
         
     }
     
@@ -451,15 +400,8 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                 }
                 
                 if (plot.pred == TRUE) {
-                  op <- par(mfrow = c(1, 3), mar = c(2, 2, 1.8, 1.8), mgp = c(1.5, 0.5, 0), oma = c(0, 0, 0, 0), 
+                  op <- par(mfrow = c(1, 2), mar = c(2, 2, 1.8, 1.8), mgp = c(1.5, 0.5, 0), oma = c(0, 0, 0, 0), 
                     cex.main = 0.8, cex.lab = 0.7, cex.axis = 0.7)
-                  
-                  ## MODIF SUR x@estimphi
-                  plot(sort(res@estimphi[indexpred]), sort(phipred), pch = 18, xlim = c(min(res@estimphi[indexpred], 
-                    phipred) * 0.8, max(res@estimphi[indexpred], phipred) * 1.2), ylim = c(min(res@estimphi[indexpred], 
-                    phipred) * 0.8, max(res@estimphi[indexpred], phipred) * 1.2), ylab = "", xlab = "", main = "Random effect in the drift")
-                  abline(0, 1)
-                  ## FIN MODIF SUR x@estimphi
                   
                   plot(timestrue, Xtrue[indexpred[1], ], type = "l", xlab = "", ylab = "", ylim = c(min(Xtrue, 
                     Xpred) * 0.8, max(Xtrue, Xpred) * 1.5), main = "True trajectories")
@@ -468,7 +410,7 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                   }
                   
                   plot(times, Xpred[1, ], type = "l", xlab = "", ylab = "", ylim = c(min(Xtrue, Xpred) * 0.8, 
-                    max(Xtrue, Xpred) * 1.5), main = "Predictive trajectories")
+                    max(Xtrue, Xpred) * 1.5), main = "Predicted trajectories")
                   for (j in 1:length(indexpred)) {
                     lines(times, Xpred[j, ], col = 1)
                   }
@@ -483,7 +425,7 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                   lines(times, PI[2, ], col = "green", lwd = 2)
                 }
             }
-            if (drift.random == c(1, 2)) {
+            if (sum(drift.random) == 3) {
                 
                 phipred <- matrix(0, 2, M - Mpred)
                 
@@ -519,21 +461,9 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                 
                 if (plot.pred == TRUE) {
                   
-                  op <- par(mfrow = c(2, 2), mar = c(2, 2, 1.8, 1.8), mgp = c(1.5, 0.5, 0), oma = c(0, 0, 0, 0), 
+                  op <- par(mfrow = c(1, 2), mar = c(2, 2, 1.8, 1.8), mgp = c(1.5, 0.5, 0), oma = c(0, 0, 0, 0), 
                     cex.main = 0.8, cex.lab = 0.7, cex.axis = 0.7)
-                  
-                  
-                  plot(sort(res@estimphi[1, indexpred]), sort(phipred[1, ]), pch = 18, xlim = c(min(res@estimphi[1, 
-                    ], phipred[1, ]) * 0.8, max(res@estimphi[1, ], phipred[1, ]) * 1.2), ylim = c(min(res@estimphi[1, 
-                    ], phipred[1, ]) * 0.8, max(res@estimphi[1, ], phipred[1, ]) * 1.2), ylab = "", xlab = "", 
-                    main = "First random effect in the drift")
-                  abline(0, 1)
-                  plot(sort(res@estimphi[2, indexpred]), sort(phipred[2, ]), pch = 18, xlim = c(min(res@estimphi[2, 
-                    ], phipred[2, ]) * 0.8, max(res@estimphi[2, ], phipred[2, ]) * 1.2), ylim = c(min(res@estimphi[2, 
-                    ], phipred[2, ]) * 0.8, max(res@estimphi[2, ], phipred[2, ]) * 1.2), ylab = "", xlab = "", 
-                    main = "Second random effect in the drift")
-                  abline(0, 1)
-                  
+
                   
                   plot(times, Xtrue[indexpred[1], ], type = "l", xlab = "", ylab = "", ylim = c(min(Xtrue, Xpred) * 
                     0.8, max(Xtrue, Xpred) * 1.5), main = "True trajectories")
@@ -542,7 +472,7 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                   }
                   
                   plot(timestrue, Xpred[1, ], type = "l", xlab = "", ylab = "", ylim = c(min(Xtrue, Xpred) * 0.8, 
-                    max(Xtrue, Xpred) * 1.5), main = "Predictive trajectories")
+                    max(Xtrue, Xpred) * 1.5), main = "Predicted trajectories")
                   for (j in 1:length(indexpred)) {
                     lines(timestrue, Xpred[j, ], col = 1)
                   }
@@ -566,21 +496,55 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
             psipred <- rep(0, M - Mpred)
             psipred <- 1/sqrt(rgamma(M - Mpred, shape = res@a, rate = 1/res@lambda))
             
-            if (sum(drift.random != 3)) {
+            if (sum(drift.random) != 3) {
+               
+                if (sum(drift.random) == 0) {
+                  phipred <- 0
+                  paramfixed <- res@mu
+                  
+                  if (model == "OU") {
+                    indexpred <- 1:(M - Mpred)
+                    Xpred <- matrix(0, (M-Mpred), N + 1)
+                    for (j in 1:(M - Mpred)) {
+                      suppressMessages(Xpred[j, ] <- sde.sim(T = Tend, X0 = Xtrue[j, 1], N = N, delta = Tend/N, 
+                                                             method = "EA", theta = c(paramfixed, psipred[j]), model = "OU"))
+                      
+                    }
+                  }
+                  if (model == "CIR") {
+                    indexpred <- which(phipred > 0)
+                    phipred <- phipred[indexpred]
+                    psipred <- psipred[indexpred]
+                    Mprednew <- length(phipred)
+                    Xpred <- matrix(0, Mprednew, N + 1)
+                    
+                    for (j in 1:Mprednew) {
+                      
+                      suppressMessages(Xpred[j, ] <- sde.sim(T = Tend, X0 = Xtrue[indexpred[j], 1], N = N, delta = Tend/N, 
+                                                             method = "milstein", theta = c(paramfixed, psipred[j]), model = "CIR", sigma.x = expression(psipred[j]/(2 * 
+                                                                                                                                                                                   sqrt(x))), sigma = expression(psipred[j] * sqrt(x))))
+                      
+                      
+                    }
+                  }
+                  
+                }
+              
                 if (sum(drift.random) == 1) {
                   
                   paramfixed <- res@mu[2]
                   
-                  phipred <- rep(0, M)
+                  phipred <- rep(0, M - Mpred)
                   
-                  for (j in 1:M) {
+                  for (j in 1:(M-Mpred)) {
                     phipred[j] <- rnorm(1, mean = res@mu[1], sd = res@omega[1] * psipred[j])
                   }
                   
                   
                   if (model == "OU") {
-                    indexpred <- 1:M
-                    for (j in 1:M) {
+                    indexpred <- 1:(M - Mpred)
+                    Xpred <- matrix(0, (M-Mpred), N + 1)
+                    for (j in 1:(M - Mpred)) {
                       suppressMessages(Xpred[j, ] <- sde.sim(T = Tend, X0 = Xtrue[j, 1], N = N, delta = Tend/N, 
                         method = "EA", theta = c(phipred[j], paramfixed, psipred[j]), model = "OU"))
                       
@@ -607,10 +571,10 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                 if (sum(drift.random) == 2) {
                   paramfixed <- res@mu[1]
                   
-                  phipred <- rep(0, M)
+                  phipred <- rep(0, M - Mpred)
                   
-                  for (j in 1:M) {
-                    phipred <- rnorm(M, res@mu[2], res@omega[2] * psipred[j])
+                  for (j in 1:(M-Mpred)) {
+                    phipred[j] <- rnorm(1, res@mu[2], res@omega[2] * psipred[j])
                   }
                   
                   
@@ -647,19 +611,9 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                 }
                 
                 if (plot.pred == TRUE) {
-                  op <- par(mfrow = c(2, 2), mar = c(2, 2, 1.8, 1.8), mgp = c(1.5, 0.5, 0), oma = c(0, 0, 0, 0), 
+                  op <- par(mfrow = c(1, 2), mar = c(2, 2, 1.8, 1.8), mgp = c(1.5, 0.5, 0), oma = c(0, 0, 0, 0), 
                     cex.main = 0.8, cex.lab = 0.7, cex.axis = 0.7)
-                  
-                  plot(sort(res@estimphi[indexpred]), sort(phipred), pch = 18, xlim = c(min(res@estimphi[indexpred], 
-                    phipred) * 0.8, max(res@estimphi[indexpred], phipred) * 1.2), ylim = c(min(res@estimphi[indexpred], 
-                    phipred) * 0.8, max(res@estimphi[indexpred], phipred) * 1.2), ylab = "", xlab = "", main = "Random effect in the drift")
-                  abline(0, 1)
-                  
-                  plot(sort(sqrt(res@estimpsi2[indexpred])), sort(psipred), pch = 18, xlim = c(min(sqrt(res@estimpsi2[indexpred]), 
-                    psipred) * 0.8, max(sqrt(rse@estimpsi2[indexpred]), psipred) * 1.2), ylim = c(min(sqrt(res@estimpsi2[indexpred]), 
-                    psipred) * 0.8, max(sqrt(res@estimpsi2[indexpred]), psipred) * 1.2), ylab = "", xlab = "", 
-                    main = "Random effect in the diffusion")
-                  abline(0, 1)
+
                   
                   plot(timestrue, Xtrue[indexpred[1], ], type = "l", xlab = "", ylab = "", ylim = c(min(Xtrue, 
                     Xpred) * 0.8, max(Xtrue, Xpred) * 1.5), main = "True trajectories")
@@ -668,7 +622,7 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                   }
                   
                   plot(times, Xpred[1, ], type = "l", xlab = "", ylab = "", ylim = c(min(Xtrue, Xpred) * 0.8, 
-                    max(Xtrue, Xpred) * 1.5), main = "Predictive trajectories")
+                    max(Xtrue, Xpred) * 1.5), main = "Predicted trajectories")
                   for (j in 1:length(indexpred)) {
                     lines(times, Xpred[j, ], col = 1)
                   }
@@ -684,7 +638,7 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
             }
             
             
-            if (drift.random == c(1, 2)) {
+            if (sum(drift.random) == 3) {
                 
                 phipred <- matrix(0, 2, M - Mpred)
                 
@@ -721,21 +675,9 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                 
                 if (plot.pred == TRUE) {
                   
-                  op <- par(mfrow = c(2, 2), mar = c(2, 2, 1.8, 1.8), mgp = c(1.5, 0.5, 0), oma = c(0, 0, 0, 0), 
+                  op <- par(mfrow = c(1, 2), mar = c(2, 2, 1.8, 1.8), mgp = c(1.5, 0.5, 0), oma = c(0, 0, 0, 0), 
                     cex.main = 0.8, cex.lab = 0.7, cex.axis = 0.7)
-                  
-                  
-                  plot(sort(res@estimphi[1, indexpred]), sort(phipred[1, ]), pch = 18, xlim = c(min(res@estimphi[1, 
-                    ], phipred[1, ]) * 0.8, max(res@estimphi[1, ], phipred[1, ]) * 1.2), ylim = c(min(res@estimphi[1, 
-                    ], phipred[1, ]) * 0.8, max(res@estimphi[1, ], phipred[1, ]) * 1.2), ylab = "", xlab = "", 
-                    main = "First random effect in the drift")
-                  abline(0, 1)
-                  plot(sort(res@estimphi[2, indexpred]), sort(phipred[2, ]), pch = 18, xlim = c(min(res@estimphi[2, 
-                    ], phipred[2, ]) * 0.8, max(res@estimphi[2, ], phipred[2, ]) * 1.2), ylim = c(min(res@estimphi[2, 
-                    ], phipred[2, ]) * 0.8, max(res@estimphi[2, ], phipred[2, ]) * 1.2), ylab = "", xlab = "", 
-                    main = "Second random effect in the drift")
-                  abline(0, 1)
-                  
+
                   
                   plot(times, Xtrue[indexpred[1], ], type = "l", xlab = "", ylab = "", ylim = c(min(Xtrue, Xpred) * 
                     0.8, max(Xtrue, Xpred) * 1.5), main = "True trajectories")
@@ -744,7 +686,7 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
                   }
                   
                   plot(timestrue, Xpred[1, ], type = "l", xlab = "", ylab = "", ylim = c(min(Xtrue, Xpred) * 0.8, 
-                    max(Xtrue, Xpred) * 1.5), main = "Predictive trajectories")
+                    max(Xtrue, Xpred) * 1.5), main = "Predicted trajectories")
                   for (j in 1:length(indexpred)) {
                     lines(timestrue, Xpred[j, ], col = 1)
                   }
@@ -762,11 +704,13 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
             
             
         }
+      
+      ############# 
+      #res <- out(res)
+      return(new(Class = "class.pred", estim = res, phipred = as.matrix(phipred), Xpred = Xpred, indexpred = indexpred))
+      
     }
     
-    ############# 
-    res <- out(res)
-    return(new(Class = "class.mixture.pred", res = res, phipred = phipred, Xpred = Xpred, indexpred = indexpred))
 }
 
 
@@ -777,23 +721,23 @@ msde.pred <- function(times, X, model = c("OU", "CIR"), drift.random, drift.fixe
 
 #' S4 class for the estimation results in the mixed SDE with random effects in the drift, in the diffusion or both 
 #'  
-#' @slot res character 'OU' or 'CIR'
-#' @slot phipred numeric 1, 2, or c(1,2)
-#' @slot Xpred
-#' @slot idexpred matrix of values on which the estimation of the density of the random effects is done
+#' @slot estim object of class Fit.class containing the results of the model estimation
+#' @slot phipred matrix of simulated values for the random effects in the drift that are used for prediction (dimensions)
+#' @slot Xpred matrix of simulated trajectories used for prediction (dimensions)
+#' @slot idexpred vector of indexes of the true trajectories that are used for prediction
 
-setClass(Class = "class.pred", representation = representation(res = "list", phipred = "matrix", Xpred = "matrix", 
+setClass(Class = "class.pred", representation = representation(estim = "Fit.class", phipred = "matrix", Xpred = "matrix", 
     indexpred = "numeric"))
 
-#' S4 class for the parametric estimation results when the random effects in the drift follow 
-#' mixture of normal distributions  
-#'  
-#' @slot res character 'OU' or 'CIR'
+#' S4 class for the parametric estimation results when the random effects in the drift follow
+#' mixture of normal distributions
+#'
+#' @slot estim object of class Mixture.fit.class containing the results of the model estimation
 #' @slot phipred numeric 1, 2, or c(1,2)
-#' @slot Xpred
+#' @slot Xpred matrix of predicted trajectories (dimensions)
 #' @slot idexpred matrix of values on which the estimation of the density of the random effects is done
 
-setClass(Class = "class.mixture.pred", representation = representation(res = "list", phipred = "matrix", Xpred = "matrix", 
+setClass(Class = "class.mixture.pred", representation = representation(estim = "Mixture.fit.class", phipred = "matrix", Xpred = "matrix",
     indexpred = "numeric"))
 
 

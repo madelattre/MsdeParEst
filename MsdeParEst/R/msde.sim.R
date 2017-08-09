@@ -1,3 +1,8 @@
+# MsdeParEst R package ; file msde.sim.r (last modified: 2017-08-09)
+# Authors: M. Delattre, C. Dion
+# Copyright INRA 2017
+# UMR 518 AgroParisTech/INRA, 16 rue Claude Bernard, 75 231 Paris Cedex 05
+
 #' Simulation Of A Mixed Stochastic Differential Equation
 #' 
 #' @description Simulation of M independent trajectories of a mixed stochastic differential equation (SDE) with linear drift
@@ -108,8 +113,7 @@ msde.sim <- function(M, T, N = 100, model, drift.random, diffusion.random, mixtu
                 phi[2, ] <- rnorm(M, drift.param[3], drift.param[4])
             }
             if (mixture == 1) {
-                phi[1, ] <- mixture.sim(M, drift.param[,c(1,2)], mixt.prop)
-                phi[2, ] <- mixture.sim(M, drift.param[,c(3,4)], mixt.prop)
+                phi <- mixture.sim(M, drift.param, mixt.prop)$Y
             }
             
             

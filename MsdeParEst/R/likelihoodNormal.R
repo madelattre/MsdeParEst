@@ -1,3 +1,8 @@
+# MsdeParEst R package ; file likelihoodNormal.r (last modified: 2017-08-09)
+# Authors: M. Delattre, C. Dion
+# Copyright INRA 2017
+# UMR 518 AgroParisTech/INRA, 16 rue Claude Bernard, 75 231 Paris Cedex 05
+
 #' Computation Of The Log Likelihood In Mixed Stochastic Differential Equations with random effects in the drift and fixed effect in the diffusion.
 #' 
 #' @description Computation of -2 log-likelihood of the mixed SDE 

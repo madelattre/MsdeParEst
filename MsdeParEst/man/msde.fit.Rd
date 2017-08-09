@@ -4,9 +4,9 @@
 \alias{msde.fit}
 \title{Estimation Of The Random Effects In Mixed Stochastic Differential Equations}
 \usage{
-msde.fit(times, X, model = c("OU", "CIR"), drift.random, drift.fixed = NULL,
-  diffusion.random = 0, diffusion.fixed = NULL, mixture = 0,
-  nb.mixt = 1, Niter = 10, discrete = 1)
+msde.fit(times, X, model = c("OU", "CIR"), drift.random = c(1, 2),
+  drift.fixed = NULL, diffusion.random = 0, diffusion.fixed = NULL,
+  mixture = 0, nb.mixt = 1, Niter = 10, discrete = 1)
 }
 \arguments{
 \item{times}{vector of observation times}
@@ -15,7 +15,7 @@ msde.fit(times, X, model = c("OU", "CIR"), drift.random, drift.fixed = NULL,
 
 \item{model}{name of the SDE: 'OU' (Ornstein-Uhlenbeck) or 'CIR' (Cox-Ingersoll-Ross)}
 
-\item{drift.random}{random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects}
+\item{drift.random}{random effects in the drift: 0 if only fixed effects, 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects. Defaults to c(1,2).}
 
 \item{drift.fixed}{NULL if the fixed effect(s) in the drift is (are) estimated, value of the fixed effect(s) otherwise. Default to NULL}
 

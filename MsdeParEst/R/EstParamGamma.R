@@ -1,3 +1,8 @@
+# MsdeParEst R package ; file EstParamGamma.r (last modified: 2017-08-09)
+# Authors: M. Delattre, C. Dion
+# Copyright INRA 2017
+# UMR 518 AgroParisTech/INRA, 16 rue Claude Bernard, 75 231 Paris Cedex 05
+
 #' Estimation In Mixed Stochastic Differential Equations with fixed effects in the drift and one random effect in the diffusion coefficient
 #' 
 #' @description Parameter estimation of the mixed SDE with Gamma distribution of the diffusion random effect 
@@ -11,8 +16,7 @@
 #' @param S vector of the M sufficient statistics S (see \code{\link{UVS}}).
 #' @param SigDelta vector of the M constant terms of the individual likelihood (see \code{\link{UVS}}).
 #' @param K number of times of observations.
-#' @param drift.param values of the fixed effects in the drift. Defaults to c(0,0).
-#' @param drift.estim 1 if the fixed effects in the drift are estimated, 0 otherwise. Defaults to 1.
+#' @param drift.param values of the fixed effects in the drift if know, NULL if the fixed effects are estimated. Defaults to NULL.
 #' @return
 #' \item{mu}{values of the fixed effects in the drift.}
 #' \item{a}{estimated value of the shape of the Gamma distribution.}
@@ -26,7 +30,7 @@
 #' Estimation of population parameters in stochastic differential equations with random effects in the diffusion coefficient, M. Delattre, V. Genon-Catalot and A. Samson, \emph{ESAIM: Probability and Statistics 2015}, Vol 19, \bold{671 -- 688}
 
 
-EstParamGamma <- function(U, V, S, SigDelta, K, drift.param = c(0, 0), drift.estim = 1) {
+EstParamGamma <- function(U, V, S, SigDelta, K, drift.param = NULL) {
   
   M <- length(S)
   
@@ -36,7 +40,7 @@ EstParamGamma <- function(U, V, S, SigDelta, K, drift.param = c(0, 0), drift.est
   init.a <- (mean(estimGamma))^2/var(estimGamma)
   init.lambda <- var(estimGamma)/mean(estimGamma)
   
-  if (drift.estim == 0) {
+  if (!is.null(drift.param)) {
     ln = function(param) {
       contrastGamma(exp(param[1]), exp(param[2]), U, V, S, K, drift.param)
     }
@@ -57,7 +61,7 @@ EstParamGamma <- function(U, V, S, SigDelta, K, drift.param = c(0, 0), drift.est
     }
   }
   
-  if (drift.estim == 1) {
+  if (is.null(drift.param)) {
     
     estimphi <- c(0, 0)
     
