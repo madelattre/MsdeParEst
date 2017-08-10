@@ -7,32 +7,31 @@
 #' Estimation Of The Random Effects In Mixed Stochastic Differential Equations
 #' 
 #' 
-#' @description Parametric estimation of the joint density of the random effects \eqn{(\alpha_j, \beta_j, \sigma_j)} in the mixed SDE
+#' @description Parametric estimation of the joint density of the random effects in the mixed SDE
 #' 
-#'  \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j a(X_j(t)) dW_j(t)}.
+#'  \deqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j \ a(X_j(t)) dW_j(t),}
+#'  \eqn{j=1,\ldots,M}, where the \eqn{(W_j(t))} are independant Wiener processes and the \eqn{(X_j(t))} are observed without noise. 
+#'  There can be random effects either in the drift \eqn{(\alpha_j,\beta_j)} or in the diffusion coefficient \eqn{\sigma_j} or both.
 #'  
 #' @param times vector of observation times
 #' @param X matrix of the M trajectories (each row is a trajectory with as much columns as observations)
 #' @param model name of the SDE: 'OU' (Ornstein-Uhlenbeck) or 'CIR' (Cox-Ingersoll-Ross)
-#' @param drift.random random effects in the drift: 0 if only fixed effects, 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects. Defaults to c(1,2).
+#' @param drift.random random effects in the drift: 0 if only fixed effects, 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects. Default to c(1,2)
 #' @param drift.fixed NULL if the fixed effect(s) in the drift is (are) estimated, value of the fixed effect(s) otherwise. Default to NULL
-#' @param diffusion.random default 0, 1 if one random effect in the diffusion, 0 if there is no random effect in the diffusion
-#' @param diffusion.fixed NULL if the fixed effect in the diffusion is estimated, value of the fixed effect otherwise. Default to NULL
-#' @param mixture 1 if the random effects in the drift follow a mixture distribution, 0 otherwise. Default to 0.
-#' @param nb.mixt default 1, number of mixture components for the distribution of the random effects in the drift otherwise. 
-#' @param Niter default 10, number of iterations for the EM algorithm if mixture = 1
-#' @param discrete default 1, 1 for discrete observations, 0 otherwise. If discrete = 0, and diffusion.random = 0, the exact likelihood associated with continuous observations is 
-#' discretized. If discrete = 1, the likelihood of the Euler scheme of the mixed SDE is computed. 
+#' @param diffusion.random 1 if \eqn{\sigma} is random, 0 otherwise. Default to 0
+#' @param diffusion.fixed NULL if \eqn{\sigma} is estimated (if fixed), value of \eqn{\sigma} otherwise. Default to NULL
+#' @param mixture 1 if the random effects in the drift follow a mixture distribution, 0 otherwise. Default to 0
+#' @param nb.mixt number of mixture components for the distribution of the random effects in the drift. Default to 1 (no mixture) 
+#' @param Niter number of iterations for the EM algorithm if the random effects in the drift follow a mixture distribution. Default to 10
+#' @param discrete 1 for using a contrast based on discrete observations, 0 otherwise. Default to 1 
 #' @return 
-#'
-
-#' \item{index}{is the vector of subscript in \eqn{1,...,M} where the estimation of \eqn{phi} has been done,  most of the time \eqn{index= 1:M}}
-#' \item{estimphi}{matrix of estimators of \eqn{\phi=\alpha, or \beta, or (\alpha,\beta)} from the efficient statitics (see \code{\link{UVS}}), matrix of two lines if drift.random =c(1,2), numerical type otherwise}
-#' \item{estimpsi2}{matrix of estimators of \eqn{\psi^2=\sigma^2} from the efficient statistics (see \code{\link{UVS}}), matrix of one line}
+#' \item{index}{is the vector of subscript in 1,...,M used for the estimation. most of the time index=1:M, except for the CIR that requires positive trajectories.}
+#' \item{estimphi}{matrix of estimators of the drift random effects \eqn{\hat{\alpha}_j}, or \eqn{\hat{\beta}_j} or \eqn{(\hat{\alpha}_j,\hat{\beta}_j)}}
+#' \item{estimpsi2}{vector of estimators of the squared diffusion random effects \eqn{\hat{\sigma}_j^2}}
 #' \item{gridf}{grid of values for the plots of the random effects distribution in the drift, matrix form}
 #' \item{gridg}{grid of values for the plots of the random effects distribution in the diffusion, matrix form}
-#' \item{estimf}{estimator of the density of \eqn{\phi} from a kernel estimator from package: stats, function: density. Matrix form: one line if one random effect or square matrix otherwise}
-#' \item{estimg}{estimator of the density of \eqn{\psi^2}. Matrix form: one line if one random effect or square matrix otherwise}
+#' \item{estimf}{estimator of the density of \eqn{\alpha_j}, \eqn{\beta_j} or \eqn{(\alpha_j,\beta_j)}. Matrix form.}
+#' \item{estimg}{estimator of the density of \eqn{\sigma_j^2}. Matrix form.}
 #' \item{mu}{estimator of the mean of the random effects normal density}
 #' \item{omega}{estimator of the standard deviation of the random effects normal density}
 #' \item{a}{estimated value of the shape of the Gamma distribution}
@@ -44,13 +43,13 @@
 #' \item{drift.random}{initial choice}
 #' \item{diffusion.random}{initial choice}
 #' \item{drift.fixed}{initial choice}
-#' \item{estim.drift.fix}{initial choice}
-#' \item{estim.diffusion.fixed}{initial choice}
+#' \item{estim.drift.fix}{1 if the fixed effects in the drift are estimated, 0 otherwise.}
+#' \item{estim.diffusion.fixed}{1 if the fixed effect in the diffusion is estimated, 0 otherwise.}
 #' \item{discrete}{initial choice}
 #' \item{times}{initial choice}
 #' \item{X}{initial choice}
 #' 
-#' For the 'paramMLmixture' method:
+#' For mixture distributions in the drift:
 #' \item{mu}{estimated value of the mean at each iteration of the algorithm. Niter x N x 2 array. }
 #' \item{omega}{estimated value of the standard deviation at each iteration of the algorithm. Niter x N x 2 array.}
 #' \item{mixt.prop}{estimated value of the mixture proportions at each iteration of the algorithm. Niter x N matrix.}
@@ -67,198 +66,77 @@
 #' @importFrom graphics lines
 #' 
 #' @details
-#' Estimation of the random effects density from M independent trajectories of the SDE (the Brownian motions \eqn{W_j} are independent), with linear drift. 
+#' Estimation of the random effects density from M independent trajectories of the SDE:
+#' \deqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j \ a(X_j(t)) dW_j(t),}
+#' \eqn{j=1,\ldots,M}, where the \eqn{(W_j(t))} are independant Wiener processes and the \eqn{(X_j(t))} are observed without noise. 
+#' 
+#' \bold{Specification of the random effects:}
+#' 
 #' The drift includes no, one or two random effects: 
-#' 
-#' if drift.random = 0: \eqn{\alpha_j \equiv \alpha} and \eqn{\beta_j \equiv \beta} are fixed
-#' 
-#' if drift.random = 1: \eqn{\beta_j \equiv \beta} is fixed and \eqn{\alpha_j} is random
-#' 
-#' if drift.random = 2: \eqn{\alpha_j \equiv \alpha} is fixed and \eqn{\beta_j} is random  
-#' 
-#' if drift.random = c(1,2): \eqn{\alpha_j} and \eqn{\beta_j} are random
+#' \enumerate{
+#' \item if drift.random = 0: \eqn{\alpha_j \equiv \alpha} and \eqn{\beta_j \equiv \beta} are fixed
+#' \item if drift.random = 1: \eqn{\beta_j \equiv \beta} is fixed and \eqn{\alpha_j} is random
+#' \item if drift.random = 2: \eqn{\alpha_j \equiv \alpha} is fixed and \eqn{\beta_j} is random  
+#' \item if drift.random = c(1,2): \eqn{\alpha_j} and \eqn{\beta_j} are random
+#' }
 #' 
 #' The diffusion includes either a fixed effect or a random effect:
+#' \enumerate{
+#' \item if diffusion.random = 0: \eqn{\sigma_j \equiv \sigma} is fixed
+#' \item if diffusion.random = 1: \eqn{\sigma_j} is random
+#' }
 #' 
-#' if diffusion.random = 0: \eqn{\sigma_j \equiv \sigma} is fixed
+#' \bold{Distribution of the random effects}
 #' 
-#' if diffusion.random = 1: \eqn{\sigma_j} is random
+#' If there is no random effect in the diffusion (diffusion.random = 0), there is at least on random effect in the drift that follows
+#' \enumerate{
+#' \item a Gaussian distribution (nb.mixt=1): 
+#' \eqn{\alpha_j \sim N(\mu,\Omega)} or \eqn{\beta_j \sim N(\mu,\Omega)} or \eqn{(\alpha_j,\beta_j) \sim N(\mu,\Omega)},
+#' \item or a mixture of Gaussian distributions (nb.mixt=K, K>1):
+#' \eqn{\alpha_j \sim \sum_{k=1}^{K} p_k N(\mu_k,\Omega_k)} or \eqn{\beta_j \sim \sum_{k=1}^{K} p_k N(\mu_k,\Omega_k)} or \eqn{(\alpha_j,\beta_j) \sim \sum_{k=1}^{K} p_k N(\mu_k,\Omega_k)},
+#' where \eqn{\sum_{k=1}^{K} p_k=1.}
+#' } 
 #' 
-#' If there is no random effect in the diffusion (diffusion.random = 0), the drift random effect follow Gaussian distributions: 
-#' \eqn{\alpha_j,\beta_j \sim N(\mu,\Omega)}.
-#' If there is one random effect (\eqn{\sigma_j}) in the diffusion (diffusion.random = 1), \eqn{\sigma_j \sim Gamma(a,\lambda)}, and 
-#' \eqn{\alpha_j,\beta_j|\sigma_j \sim N(\mu,\sigma_j^2 \Omega)}.
+#' If there is one random effect in the diffusion (diffusion.random = 1), \eqn{1/\sigma_j^2 \sim \Gamma(a,\lambda)}, and the coefficients
+#' in the drift are conditionally Gaussian: \eqn{\alpha_j|\sigma_j \sim N(\mu,\sigma_j^2 \Omega)} or \eqn{\beta_j|\sigma_j \sim N(\mu,\sigma_j^2 \Omega)} 
+#' or \eqn{(\alpha_j,\beta_j)|\sigma_j \sim N(\mu,\sigma_j^2 \Omega)}, or they are fixed \eqn{\alpha_j \equiv \alpha, \beta_j \equiv \beta}.
+#' 
+#' \bold{SDEs}
 #' 
 #' Two diffusions are implemented: 
+#' \enumerate{
+#' \item the Ornstein-Uhlenbeck model (OU) \eqn{a(X_j(t))=1}
+#' \item the Cox-Ingersoll-Ross model (CIR) \eqn{a(X_j(t))=\sqrt{X_j(t)}}
+#' }
 #' 
-#' the Ornstein-Uhlenbeck model (OU) \eqn{a(X_j(t))=1}
 #' 
-#' the Cox-Ingersoll-Ross model (CIR) \eqn{a(X_j(t))=\sqrt{X_j(t)}}
+#' \bold{Estimation}
 #' 
-#'  Validation method:
-#'  For a number of trajectory numj (fixed by the user or randomly chosen) this function simulates 
-#'  Mrep =100 (by default) new trajectories with the value of the estimated random effect. 
-#'  Then it plots on the left graph the Mrep new trajectories 
-#'  \eqn{(Xnumj^{k}(t1), ... Xnumj^{k}(tN)), k= 1, ... Mrep} with in red the true trajectory 
-#'  \eqn{(Xnumj(t1), ... Xnumj(tN))}. The right graph is a qq-plot of the quantiles of samples 
-#'  \eqn{(Xnumj^{1}(ti), ... Xnumj^{Mrep}(ti))}
-#'  for each time \eqn{ti} compared with the uniform quantiles. The outputs of the function  
-#'  are: a matrix \code{Xnew} dimension Mrepx N+1, vector of quantiles \code{quantiles} length 
-#'  N and the number of the trajectory for the plot \code{numj} 
-#' 
-#'  Prediction method: (A COMPLETER)
+#' \itemize{
+#' \item If discrete = 0, the estimation is based on the exact likelihood associated with continuous observations ([1],[3]). This is only possible if diffusion.random = 0. 
+#' \item If discrete = 1, the likelihood of the Euler scheme of the mixed SDE is computed.
+#' \item If nb.mixt > 1, an EM algorithm is implemented and the number of iterations of the algorithm must be specified with Niter.
+#' }
 #'  
 #'  
-
+#'  
 #' @examples
 #'
 #' \dontrun{
-#' # Example 1: one random effect in the drift and one random effect in the diffusion coefficient.
-#' 
-#' # -- Simulation
-#' M <- 100
-#' Tmax <- 5
-#' N <- 5000
-#' model <- 'OU'
-#' drift.random <- 2
-#' diffusion.random <- 1
-#' drift.fixed <- 0
-#' drift.param <- c(0.5,0.5)
-#' diffusion.param <- c(8,1/2)
-#'
-#' sim1 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random, 
-#' diffusion.random = diffusion.random, drift.fixed = drift.fixed, 
-#' mixture = 0, drift.param = drift.param, diffusion.param = diffusion.param)
-#'                  
-#' # -- Estimation
-#' 
-#' # -----Fixed effect in the drift estimated
-#' res1 <- msde.fit(times = sim1$times, X = sim1$X, model = 'OU', drift.random = 2, 
-#'                  diffusion.random = 1, estim.drift.fix = 1, mixture = 0)
-#' summary(res1)
-#' valid(res1)
-#' plot(res1)
-#' 
-#' # ----- Fixed effect in the drift known and not estimated
-#' res1bis <- msde.fit(times = sim1$times, X = sim1$X, model = 'OU', drift.random = 2, 
-#'                     diffusion.random = 1, drift.fixed=0, mixture = 0)
-#' summary(res1bis)
-#' 
-#' # Example 2: one random effect in the drift and one fixed effect in the diffusion coefficient
-#' 
-#' # -- Simulation
-#' M <- 100
-#' Tmax <- 5
-#' N <- 5000
-#' model <- 'OU'
-#' diffusion.random <- 0
-#' diffusion.param <- 0.5
-#' drift.random <- 2
-#' drift.fixed <- 10
-#' drift.param <- c(1,sqrt(0.4/4))
-#' 
-#' sim2 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random,
-#' diffusion.random = diffusion.random, drift.fixed = drift.fixed,
-#' mixture=0, drift.param = drift.param,
-#' diffusion.param = diffusion.param)
-#' 
-#' # -- Estimation
-#' res2 <- msde.fit(times = sim2$times, X = sim2$X, model = 'OU', drift.random = 2, 
-#'                  diffusion.random = 0, estim.drift.fix = 1, mixture = 0)
-#' 
-#' summary(res2)
-#' plot(res2)
-#' 
-#' # Example 3: two random effects in the drift and one random effect in the diffusion coefficient
-#' 
-#' # -- Simulation
-#' M <- 100
-#' Tmax <- 5
-#' N <- 5000
-#' model <- 'OU'
-#' drift.random <- c(1,2)
-#' diffusion.random <- 1
-#' density.phi <- 'normalnormal'
-#' drift.param <- c(1,0.5,0.5,0.5)
-#' diffusion.param <- c(8,1/2)
-#' 
-#' sim3 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random,
-#' diffusion.random = diffusion.random, mixture = 0,
-#' drift.param = drift.param, diffusion.param = diffusion.param)
-#' 
-#' # -- Estimation
-#' 
-#' res3 <- msde.fit(times = sim3$times, X = sim3$X, model = 'OU', drift.random = c(1,2), 
-#'                  diffusion.random = 1, mixture = 0)
-#' summary(res3)
-#' plot(res3)
-#' 
-#' # Example 4: fixed effects in the drift and one random effect in the diffusion coefficient
-#' 
-#' # -- Simulation
-#' M <- 100
-#' Tmax <- 5
-#' N <- 5000
-#' model <- 'OU'
-#' drift.random <- 0
-#' diffusion.random <- 1
-#' drift.fixed <- c(0,1)
-#' diffusion.param <- c(5,3)
-#' 
-#' sim4 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random,
-#' diffusion.random = diffusion.random, drift.fixed = drift.fixed,
-#' diffusion.param = diffusion.param)
-#'
-#' # -- Estimation
-#' res4 <- msde.fit(times = sim4$times, X = sim4$X, model = 'OU', drift.random = 0, 
-#'                  diffusion.random = 1, mixture = 0, estim.drift.fix = 0, 
-#'                  drift.fixed = c(0,0), discrete = 1)
-#' 
-#' summary(res4)
-#' 
-#' # Example 5: one fixed effect and one mixture random effect in the drift, and one fixed effect in 
-#' # the diffusion coefficient
-#' 
-#' # -- Simulation
-#' M <- 100
-#' Tmax <- 5
-#' N <- 5000
-#' diffusion.random <- 0
-#' diffusion.param <- 0.1
-#' model <- 'OU'
-#' drift.random <- 1
-#' drift.fixed <- 1
-#' nb.mixt <- 2
-#' mixt.prop <- c(0.5,0.5)
-#' param.ea1 <- c(0.5, 0.25, 1.8, 0.25)
-#' param.ea2 <- c(1, 0.25, 1, 0.25) 
-#' drift.param <- param.ea1
-#' 
-#' sim5 <- msde.sim(M = M, T = Tmax, N = N, model = model, drift.random = drift.random,
-#'                  diffusion.random = diffusion.random, drift.fixed = drift.fixed,
-#'                  mixture=1, drift.param = drift.param,
-#'                  diffusion.param = diffusion.param, nb.mixt = nb.mixt, mixt.prop = mixt.prop)
-#'
-#' # -- Estimation
-#' res5 <- msde.fit(times = sim5$times, X = sim5$X, model = 'OU', drift.random = 1, 
-#'                  estim.drift.fix = 1, diffusion.random = 0, estim.diffusion.fix = 1, 
-#'                  mixture = 1, nb.mixt=2, Niter = 25)
-#' 
-#' summary(res5)
-#' plot(res5)
 #'   }
 #' 
 #' @keywords estimation
 #' @references See  
-#' Maximum Likelihood Estimation for Stochastic Differential Equations with Random Effects, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{Scandinavian Journal of Statistics 40(2) 2012} \bold{322-343} 
 #' 
-#' Estimation of population parameters in stochastic differential equations with random effects in the diffusion coefficient, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{ESAIM:PS 19 2015} \bold{671-688}
+#' \bold{[1]} Maximum Likelihood Estimation for Stochastic Differential Equations with Random Effects, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{Scandinavian Journal of Statistics 40(2) 2012} \bold{322-343} 
 #' 
-#' Mixtures of stochastic differential equations with random effects: application to data clustering, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{Journal of Statistical Planning and Inference 173 2016} \bold{109-124} 
+#' \bold{[2]} Estimation of population parameters in stochastic differential equations with random effects in the diffusion coefficient, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{ESAIM:PS 19 2015} \bold{671-688}
 #' 
-#' Parametric inference for discrete observations of diffusion processes with mixed effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01332630 2016}
+#' \bold{[3]} Mixtures of stochastic differential equations with random effects: application to data clustering, Delattre, M., Genon-Catalot, V. and Samson, A. \emph{Journal of Statistical Planning and Inference 173 2016} \bold{109-124} 
 #' 
-#' Estimation of the joint distribution of random effects for a discretely observed diffusion with random effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01446063 2017}
+#' \bold{[4]} Parametric inference for discrete observations of diffusion processes with mixed effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01332630 2016}
+#' 
+#' \bold{[5]} Estimation of the joint distribution of random effects for a discretely observed diffusion with random effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01446063 2017}
 
 
 msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random = c(1,2), drift.fixed = NULL, 

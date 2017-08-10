@@ -8,19 +8,19 @@ Parametric estimation in mixed-effects stochastic differential equations
 \details{
 This package is dedicated to parametric estimation in the following mixed-effects stochastic differential equations:
 \deqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j \ a(X_j(t)) dW_j(t),}
-\eqn{j=1,\ldots,N}, where the \eqn{(W_j(t))} are independant Wiener processes and the \eqn{(X_j(t))} are observed without noise. The volatility function \eqn{a(x)} is known and can be either \eqn{a(x)=1} (Ornstein-Uhlenbeck process) or \eqn{a(x)=\sqrt{x}} (Cox-Ingersoll-Ross process).
+\eqn{j=1,\ldots,M}, where the \eqn{(W_j(t))} are independant Wiener processes and the \eqn{(X_j(t))} are observed without noise. The volatility function \eqn{a(x)} is known and can be either \eqn{a(x)=1} (Ornstein-Uhlenbeck process) or \eqn{a(x)=\sqrt{x}} (Cox-Ingersoll-Ross process).
 
 Different estimation methods are implemented depending on whether there are random effects in the drift and/or in the diffusion coefficient:
 \enumerate{
 \item The diffusion coefficient is fixed \eqn{\sigma_j \equiv \sigma} and the parameters in the drift are Gaussian random variables: 
 \enumerate{
-\item either \eqn{\alpha_j \equiv \alpha} and \eqn{\beta_j \sim N(\mu,\Omega), j=1,\ldots,N},
-\item or \eqn{\beta_j \equiv \beta} and \eqn{\alpha_j \sim N(\mu,\Omega), j=1,\ldots,N},
-\item or \eqn{(\alpha_j,\beta_j) \sim N(\mu,\Omega), j=1,\ldots,N}. 
+\item either \eqn{\alpha_j \equiv \alpha} and \eqn{\beta_j \sim N(\mu,\Omega), j=1,\ldots,M},
+\item or \eqn{\beta_j \equiv \beta} and \eqn{\alpha_j \sim N(\mu,\Omega), j=1,\ldots,M},
+\item or \eqn{(\alpha_j,\beta_j) \sim N(\mu,\Omega), j=1,\ldots,M}. 
 }
 \eqn{\mu}, \eqn{\Omega} and potentially the fixed effects \eqn{\sigma}, \eqn{\alpha}, \eqn{\beta} are estimated as proposed in [1] and [4]. The extension to mixtures of Gaussian distributions is also implemented by following [3].
 
-\item The coefficients in the drift are fixed \eqn{\alpha_j \equiv \alpha} and \eqn{\beta_j \equiv \beta} and the diffusion coefficient \eqn{1/\sigma_j^2} follows a Gamma distribution \eqn{1/\sigma_j^2 \sim \Gamma(a,\lambda), j=1,\ldots,N}. \eqn{a}, \eqn{\lambda}, and potentially the fixed effects \eqn{\alpha} and \eqn{\beta} are estimated by the method published in [2].
+\item The coefficients in the drift are fixed \eqn{\alpha_j \equiv \alpha} and \eqn{\beta_j \equiv \beta} and the diffusion coefficient \eqn{1/\sigma_j^2} follows a Gamma distribution \eqn{1/\sigma_j^2 \sim \Gamma(a,\lambda), j=1,\ldots,M}. \eqn{a}, \eqn{\lambda}, and potentially the fixed effects \eqn{\alpha} and \eqn{\beta} are estimated by the method published in [2].
 
 \item There are random effects in the drift and in the diffusion, such that \eqn{1/\sigma_j^2 \sim \Gamma(a,\lambda)} and 
 \enumerate{
