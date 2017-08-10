@@ -53,11 +53,10 @@ res1 <- msde.fit(times = sim1$times, X = sim1$X, model = 'OU', drift.random = 2,
 
 # -- Estimation and prediction
 
-res1.pred <- msde.pred(times = sim1$times, X = sim1$X, model = 'OU', drift.random = 2, diffusion.random = 1)
+res1.valid <- msde.fit(times = sim1$times, X = sim1$X, model = 'OU', drift.random = 2, diffusion.random = 1,valid=1)
 
-summary(res1.pred@estim)
-valid(res1.pred@estim)
-plot(res1.pred@estim)
+summary(res1.valid) # PB ESTIMATION DE L'ECART TYPE: effet du tirage
+plot(res1.valid)
 
 # ----- Fixed effect in the drift known and not estimated
 
@@ -67,9 +66,9 @@ res1bis <- msde.fit(times = sim1$times, X = sim1$X, model = "OU", drift.random =
 summary(res1bis)
 
 # -- Estimation and prediction
-res1bis.pred <- msde.pred(times = sim1$times, X = sim1$X, model = "OU", drift.random = 2, 
-                          diffusion.random = 1, drift.fixed = 0)
-summary(res1bis.pred@estim)
+res1bis.valid <- msde.fit(times = sim1$times, X = sim1$X, model = "OU", drift.random = 2, 
+                          diffusion.random = 1, drift.fixed = 0, valid = 1)
+summary(res1bis.valid)
 
 # Example 2: one random effect in the drift and one fixed effect in the diffusion coefficient
 
@@ -87,11 +86,11 @@ summary(res2)
 plot(res2)
 
 # -- Estimation with prediction
-res2.pred <- msde.pred(times = sim2$times, X = sim2$X, model = 'OU', drift.random = 2,
-                       diffusion.random = 0)
+res2.valid <- msde.fit(times = sim2$times, X = sim2$X, model = 'OU', drift.random = 2,
+                       diffusion.random = 0, valid = 1)
 
-summary(res2.pred@estim)
-plot(res2.pred@estim)
+summary(res2.valid)
+plot(res2.valid)
 
 
 # Example 3: two random effects in the drift and one random effect in the diffusion coefficient
@@ -110,10 +109,10 @@ plot(res3)
 
 # -- Estimation with prediction
 
-res3 <- msde.pred(times = sim3$times, X = sim3$X, model = 'OU', drift.random = c(1,2),
-                 diffusion.random = 1)
-summary(res3@estim)
-plot(res3@estim)
+res3.valid <- msde.fit(times = sim3$times, X = sim3$X, model = 'OU', drift.random = c(1,2),
+                 diffusion.random = 1, valid = 1)
+summary(res3.valid)
+plot(res3.valid)
 
 # Example 4: fixed effects in the drift and one random effect in the diffusion coefficient
 
@@ -128,13 +127,14 @@ res4 <- msde.fit(times = sim4$times, X = sim4$X, model = 'OU', drift.random = 0,
 #, drift.fixed = c(0,0)
 
 summary(res4)
+plot(res4)
 
-res4.pred <- msde.pred(times = sim4$times, X = sim4$X, model = 'OU', drift.random = 0,
-                 diffusion.random = 1, drift.fixed = c(0,0))
+res4.valid <- msde.fit(times = sim4$times, X = sim4$X, model = 'OU', drift.random = 0,
+                 diffusion.random = 1, drift.fixed = c(0,0), valid = 1)
 #, drift.fixed = c(0,0)
 
-summary(res4.pred@estim)
-plot(res4.pred@estim)
+summary(res4.valid)
+plot(res4.valid)
 
 # Example 5: one fixed effect and one mixture random effect in the drift, and one fixed effect in
 # the diffusion coefficient
@@ -153,12 +153,12 @@ res5 <- msde.fit(times = sim5$times, X = sim5$X, model = 'OU', drift.random = 1,
 
 summary(res5)
 plot(res5)
-valid(res5)
 
-res5.pred <- msde.pred(times = sim5$times, X = sim5$X, model = 'OU', drift.random = 1,
-                 mixture = 1, nb.mixt=2, Niter = 10)
 
-summary(res5.pred@estim)
+res5.valid <- msde.fit(times = sim5$times, X = sim5$X, model = 'OU', drift.random = 1,
+                 mixture = 1, nb.mixt=2, Niter = 10, valid = 1)
+
+summary(res5.valid)
 
 # Example 6: one mixture of two random effects in the drift, and one fixed effect in
 # the diffusion coefficient
@@ -175,8 +175,8 @@ summary(res6)
 plot(res6)
 
 # -- Estimation with prediction
-res6.pred <- msde.pred(times = sim6$times, X = sim6$X, model = 'OU', drift.random = c(1,2),
-                 mixture = 1, nb.mixt=2, Niter = 10)
+res6.valid <- msde.fit(times = sim6$times, X = sim6$X, model = 'OU', drift.random = c(1,2),
+                 mixture = 1, nb.mixt=2, Niter = 10, valid = 1)
 
-summary(res6.pred@estim)
-plot(res6.pred@estim)
+summary(res6.valid)
+plot(res6.valid)

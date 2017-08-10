@@ -26,7 +26,9 @@ mixture of normal distributions
 
 \item{\code{sigma2}}{numeric estimated value of \eqn{\sigma^2}}
 
-\item{\code{index}}{index of the used trajectories}
+\item{\code{index}}{index of the valid trajectories for the considered model (numeric)}
+
+\item{\code{indexestim}}{index of the trajectories used for the estimation (numeric)}
 
 \item{\code{estimphi}}{matrix of the estimator of the drift random effects}
 

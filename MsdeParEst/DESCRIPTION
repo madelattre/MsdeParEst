@@ -6,6 +6,6 @@ Date: 2017-07-18
 Author: Maud Delattre, Charlotte Dion
 Maintainer: Maud Delattre <maud.delattre@agroparistech.fr>
 Description: Parametric estimation in stochastic differential equations with random effects in the drift, or in the diffusion or both. Approximate maximum likelihood methods are used. 
-License: GPL-3
+License: GPL (>=2)
 Imports: MASS, sde, moments, mvtnorm, methods, graphics
 RoxygenNote: 6.0.1

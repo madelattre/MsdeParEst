@@ -2,7 +2,6 @@
 
 importFrom(grDevices,dev.new)
 importFrom(grDevices,x11)
-importFrom(graphics,abline)
 importFrom(graphics,layout)
 importFrom(graphics,lines)
 importFrom(graphics,par)

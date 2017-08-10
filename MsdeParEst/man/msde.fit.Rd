@@ -6,7 +6,8 @@
 \usage{
 msde.fit(times, X, model = c("OU", "CIR"), drift.random = c(1, 2),
   drift.fixed = NULL, diffusion.random = 0, diffusion.fixed = NULL,
-  mixture = 0, nb.mixt = 1, Niter = 10, discrete = 1)
+  mixture = 0, nb.mixt = 1, Niter = 10, discrete = 1, valid = 0,
+  level = 0.05, newwindow = FALSE)
 }
 \arguments{
 \item{times}{vector of observation times}
@@ -30,6 +31,12 @@ msde.fit(times, X, model = c("OU", "CIR"), drift.random = c(1, 2),
 \item{Niter}{number of iterations for the EM algorithm if the random effects in the drift follow a mixture distribution. Default to 10}
 
 \item{discrete}{1 for using a contrast based on discrete observations, 0 otherwise. Default to 1}
+
+\item{valid}{1 if test validation, 0 otherwise. Default to 0}
+
+\item{level}{alpha for the predicion intervals. Default 0.05}
+
+\item{newwindow}{logical(1), if TRUE, a new window is opened for the plot. Default to FALSE}
 }
 \value{
 \item{index}{is the vector of subscript in 1,...,M used for the estimation. most of the time index=1:M, except for the CIR that requires positive trajectories.}
@@ -120,6 +127,8 @@ Two diffusions are implemented:
 \item If discrete = 0, the estimation is based on the exact likelihood associated with continuous observations ([1],[3]). This is only possible if diffusion.random = 0. 
 \item If discrete = 1, the likelihood of the Euler scheme of the mixed SDE is computed.
 \item If nb.mixt > 1, an EM algorithm is implemented and the number of iterations of the algorithm must be specified with Niter.
+\item If valid = 1, two-thirds of the sample trajectories are used for estimation, while the rest is used for validation. A plot is then provided for
+visual comparison between the true trajectories of the test sample and some predicted trajectories simulated under the estimated model.
 }
 }
 \examples{

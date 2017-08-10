@@ -30,7 +30,9 @@ S4 class for the estimation results in the mixed SDE with random effects in the 
 
 \item{\code{sigma2}}{numeric estimated value of \eqn{\sigma^2} if the diffusion coefficient is not random}
 
-\item{\code{index}}{index of the used trajectories}
+\item{\code{index}}{index of the valid trajectories for the considered model (numeric)}
+
+\item{\code{indexestim}}{index of the trajectories used for the estimation (numeric)}
 
 \item{\code{estimphi}}{matrix of the estimator of the drift random effects}
 
