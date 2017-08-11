@@ -32,7 +32,7 @@ Different estimation methods are implemented depending on whether there are rand
 
 }
 
-Some examples and more details on how to use the different functions of the package are available on the package's vignette by typing \bold{vignette("MsdeParEst")} in the R console. 
+
 }
 
 \references{

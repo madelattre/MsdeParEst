@@ -4,9 +4,9 @@
 \alias{msde.sim}
 \title{Simulation Of A Mixed Stochastic Differential Equation}
 \usage{
-msde.sim(M, T, N = 100, model, drift.random, diffusion.random, mixture = 0,
-  drift.param, diffusion.param, nb.mixt = 1, mixt.prop = 1, t0 = 0,
-  X0 = 0.01, delta = T/N, op.plot = 0, add.plot = FALSE)
+msde.sim(M, T, N = 100, model, drift.random, diffusion.random, drift.param,
+  diffusion.param, nb.mixt = 1, mixt.prop = 1, t0 = 0, X0 = 0.01,
+  delta = T/N, op.plot = 0, add.plot = FALSE)
 }
 \arguments{
 \item{M}{number of trajectories.}
@@ -21,13 +21,9 @@ msde.sim(M, T, N = 100, model, drift.random, diffusion.random, mixture = 0,
 
 \item{diffusion.random}{random effect in the diffusion coefficient: 0 if no random effect, 1 if one multiplicative random effect.}
 
-\item{mixture}{1 if the random effects in the drift follow a mixture of Normal distributions, 0 otherwise. Default to 0.}
+\item{drift.param}{vector (not mixture) or matrix (mixture) of values of the fixed effects and/or the parameters of the distribution of the random effects in the drift (see details).}
 
-\item{drift.param}{fixed effects in the drift: value of the fixed effect when there is only one random effect, 0 otherwise. 
-If drift.random =2, fixed can be 0 but \eqn{\beta} has to be a non negative random variable for the estimation.
-vector (not mixture) or matrix (mixture) of parameters of the distribution of the random effects in the drift.}
-
-\item{diffusion.param}{diffusion parameter if the diffusion coefficient is fixed, vector of parameters of the distribution of the diffusion random effect otherwise.}
+\item{diffusion.param}{diffusion parameter if the diffusion coefficient is fixed, vector of parameters \eqn{c(a,\lambda)} of the distribution of the diffusion random effect otherwise.}
 
 \item{nb.mixt}{number of mixture components if the drift random effects follow a mixture distribution, default nb.mixt=1.}
 
@@ -45,41 +41,72 @@ vector (not mixture) or matrix (mixture) of parameters of the distribution of th
 }
 \value{
 \item{X}{matrix (M x (N+1)) of the M trajectories. }
-\item{phi}{vector (or matrix) of the M simulated random effects.}
+\item{times}{vector of the N+1 simulated observation times from t0 to T.}
+\item{phi}{vector (or matrix) of the M simulated random effects of the drift.}
+\item{psi}{vector of the M simulated values of \eqn{\sigma_j}.}
 }
 \description{
 Simulation of M independent trajectories of a mixed stochastic differential equation (SDE) with linear drift
  \deqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j a(X_j(t)) dW_j(t)  ,  j=1, ..., M.}
-There may be two random effects \eqn{(\alpha_j, \beta_j)} in the drift and one random effect \eqn{\sigma_j} in the diffusion coefficient.
+There can be up to two random effects \eqn{(\alpha_j, \beta_j)} in the drift and one random effect \eqn{\sigma_j} in the diffusion coefficient.
 }
 \details{
-Simulation of M independent trajectories of the SDE (the Brownian motions \eqn{W_j} are independent), with linear drift. There may be one or two
-random effects in the drift: 
+Simulation of N discrete observations on time interval [t0,T] of M independent trajectories of the SDE 
+\deqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j \ a(X_j(t)) dW_j(t),}
+\eqn{j=1,\ldots,M}, where the \eqn{(W_j(t))} are independant Wiener processes. 
 
-If drift.random = 0, \eqn{\alpha} and \eqn{\beta} are fixed effects (\eqn{\alpha_j \equiv \alpha} and \eqn{\beta_j \equiv \beta})
+\bold{Specification of \eqn{\alpha,\beta,\sigma}}
 
-If drift.random = 1,  \eqn{\beta} is a fixed effect (\eqn{\beta_j \equiv \beta}), and the drift function is written \eqn{(\alpha_j- \beta X_j(t))}
+The diffusion includes either a fixed effect or a random effect:
+\enumerate{
+\item if diffusion.random = 0: \eqn{\sigma_j \equiv \sigma} is fixed, and diffusion.param = \eqn{\sigma}.
+In this case, the drift includes no, one or two random effects: 
+\enumerate{
+\item if drift.random = 0: \eqn{\alpha_j \equiv \alpha} and \eqn{\beta_j \equiv \beta} are fixed, and drift.param=c\eqn{(\alpha,\beta)}
+\item if drift.random = 1: \eqn{\alpha_j} is random with distribution \eqn{N(\mu_{\alpha},\omega^2_{\alpha})} whereas \eqn{\beta_j \equiv \beta} is fixed, and drift.param=c\eqn{(\mu_{\alpha},\omega^2_{\alpha},\beta)}
+\item if drift.random = 2: \eqn{\alpha_j \equiv \alpha} is fixed and \eqn{\beta_j} is random with distribution \eqn{N(\mu_{\beta},\omega^2_{\beta})},  and drift.param=c\eqn{(\alpha, \mu_{\beta},\omega^2_{\beta})}
+\item if drift.random = c(1,2): \eqn{\alpha_j} and \eqn{\beta_j} are random with distributions \eqn{N(\mu_{\alpha},\omega^2_{\alpha})} and \eqn{N(\mu_{\beta},\omega^2_{\beta})} respectively,
+and drift.param = c\eqn{(\mu_{\alpha},\omega^2_{\alpha},\mu_{\beta},\omega^2_{\beta})}
+}
+\item if diffusion.random = 1: \eqn{\sigma_j} is random such that \eqn{1/\sigma_j^2 \sim \Gamma}, and drift.param=c\eqn{(a,\lambda)}.
+In this case, the drift includes at least one random effect:
+\enumerate{
+\item if drift.random = 1: \eqn{\alpha_j} is random with distribution \eqn{N(\mu_{\alpha}, \sigma_j^2 \omega^2_{\alpha})} whereas \eqn{\beta_j \equiv \beta} is fixed, and drift.param=c\eqn{(\mu_{\alpha},\omega^2_{\alpha},\beta)}
+\item if drift.random = 2: \eqn{\alpha_j \equiv \alpha} is fixed and \eqn{\beta_j} is random with distribution \eqn{N(\mu_{\beta},\sigma_j^2 \omega^2_{\beta})},  and drift.param=c\eqn{(\alpha, \mu_{\beta},\omega^2_{\beta})}
+\item if drift.random = c(1,2): \eqn{\alpha_j} and \eqn{\beta_j} are random with distributions \eqn{N(\mu_{\alpha},\sigma_j^2 \omega^2_{\alpha})} and \eqn{N(\mu_{\beta}, \sigma_j^2 \omega^2_{\beta})} respectively,
+and drift.param = c\eqn{(\mu_{\alpha},\omega^2_{\alpha},\mu_{\beta},\omega^2_{\beta})}
+}
 
-If drift.random = 2, \eqn{\alpha} is a fixed effect (\eqn{\alpha_j \equiv \alpha}), and the drift function is written \eqn{(\alpha- \beta_j X_j(t))}
+If the random effects in the drift follow a mixture distribution (nb.mixt=K, K>1), drift.param is a matrix instead of a vector. Each line of the matrix
+contains, as above, the parameter values for each mixture component. 
+}
+}
+\examples{
 
-If drift.random = c(1,2), both effects are random, and the drift function is written \eqn{(\alpha_j- \beta_j X_j(t))}
+ \dontrun{
+ # Example : one random effect in the drift and one fixed effect in the diffusion coefficient
+ sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', drift.random = 2,
+                diffusion.random = 0, drift.param = c(0,1,sqrt(0.4/4)), diffusion.param = 0.5)
+                
+ # Example : two random effects in the drift and one random effect in the diffusion coefficient
 
-Two diffusions are implemented:
+ sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', drift.random = c(1,2),
+                diffusion.random = 1, drift.param = c(1,0.5,0.5,0.5), diffusion.param = c(8,1/2))
+                
+ # Example : one fixed effect and one mixture random effect in the drift, and one fixed effect in
+ # the diffusion coefficient
+ 
+ sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', 
+                 drift.random = 1, drift.param = matrix(c(0.5,1.8,0.25,0.25,1,1),nrow=2,byrow=F),
+                 diffusion.random = 0, diffusion.param = 0.1, 
+                 nb.mixt = 2, mixt.prop = c(0.5,0.5))
+ } 
 
-Ornstein-Uhlenbeck model (OU): \eqn{a(X_j(t))=1}
-
-Cox-Ingersoll-Ross model (CIR): \eqn{a(X_j(t))=\sqrt{X_j(t)}}
-
-There may be either a fixed or a random effect in the diffusion coefficient:
-
-If diffusion.random = 0, \eqn{\sigma} is a fixed effect (\eqn{\sigma_j \equiv \sigma}). In that case, the random effects in the drift follow a Normal distribution 
-or a mixture of Normal distributions.
-
-If diffusion.random = 1, \eqn{\sigma_j} is a random effect. In that case, \eqn{\sigma_j^2} follow an inverse Gamma distribution with parameters diffusion.param=c(shape,scale),
-and conditional on \eqn{\sigma_j}, the random effects in the drift follow a Normal distribution with mean mu and variance \eqn{Omega*\sigma_j^2}
 }
 \references{
-This function mixedsde.sim is based on the package sde, function sde.sim. See Simulation and Inference for stochastic differential equation, S.Iacus, \emph{Springer Series in Statistics 2008}
+This function mixedsde.sim is based on the package sde, function sde.sim. See 
+
+Simulation and Inference for stochastic differential equation, S.Iacus, \emph{Springer Series in Statistics 2008}
 Chapter 2
 }
 \seealso{

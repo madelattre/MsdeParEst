@@ -1,39 +1,7 @@
-# MsdeParEst R package ; file EstParamNormal.r (last modified: 2017-08-09)
+# MsdeParEst R package ; file EstParamNormal.r (last modified: 2017-08-11)
 # Authors: M. Delattre, C. Dion
 # Copyright INRA 2017
 # UMR 518 AgroParisTech/INRA, 16 rue Claude Bernard, 75 231 Paris Cedex 05
-
-#' Estimation In Mixed Stochastic Differential Equations with random effects in the drift and fixed effect in the diffusion coefficient
-#' 
-#' @description Estimation of the parameters of the mixed SDE:
-#' 
-#'  \eqn{dX_j(t)= (\alpha_j - \beta_j X_j(t))dt + \sigma a(X_j(t)) dW_j(t)},
-#'  
-#' with Normal distribution of the random effects in the drift \eqn{\alpha_j,\beta_j} and
-#' fixed parameter \eqn{\sigma} in the diffusion. Done with \code{\link{likelihoodNormal}}.
-#' @param U matrix of M sufficient statistics U (see \code{\link{UVS}}).
-#' @param V list of the M sufficient statistics matrix V (see \code{\link{UVS}}).
-#' @param S vector of the M sufficient statistics S (see \code{\link{UVS}}).
-#' @param SigDelta vector of the M constant terms of the individual likelihood (see \code{\link{UVS}}). 
-#' Required only if discrete = 1. Defaults to 0. 
-#' @param K number of times of observations.
-#' @param drift.fixed NULL if thz fixed effect in the drift is estimated, value of the fixed effect otherwise. Default to NULL.
-#' @param sigma value of the fixed effect in the diffusion if known (not estimated), NULL otherwise. Defaults to NULL.
-#' @param drift.random random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects.
-#' @param discrete 1 for discrete observations, 0 otherwise. If discrete = 0, the exact likelihood associated with continuous observations is 
-#' discretized. If discrete = 1, the likelihood of the Euler scheme of the mixed SDE is computed. Defaults to 1.
-#' @return
-#' \item{mu}{estimated value of the mean of the Normal distribution}
-#' \item{omega}{estimated value of the standard deviation of the Normal distribution}
-#' \item{sigma}{value of the diffusion coefficient}
-#' \item{BIChere}{BIC indicator}
-#' \item{AIChere}{AIC indicator}
-#' @importFrom stats optim
-#' @importFrom stats var
-#' 
-#' @references
-#' Maximum likelihood estimation for stochastic differential equations with random effects, M. Delattre, V. Genon-Catalot and A. Samson, \emph{Scandinavian Journal of Statistics 2012}, Vol 40, \bold{322--343}
-
 
 EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = NULL, 
     sigma = NULL, drift.random, discrete = 1) {

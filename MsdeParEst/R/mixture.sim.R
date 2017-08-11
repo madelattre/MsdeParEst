@@ -1,25 +1,7 @@
-# MsdeParEst R package ; file mixture.sim.r (last modified: 2017-08-09)
+# MsdeParEst R package ; file mixture.sim.r (last modified: 2017-08-11)
 # Authors: M. Delattre, C. Dion
 # Copyright INRA 2017
 # UMR 518 AgroParisTech/INRA, 16 rue Claude Bernard, 75 231 Paris Cedex 05
-
-#' Simulation Of A Mixture Of Normal Distributions
-#' 
-#' @description Simulation of M random variables from a mixture of Gaussian distributions
-#' @param M number of simulated variables 
-#' @param param vector of parameters with the means and standard-deviations of the normal distributions 
-#' @param prob mixture components probabilities
-#' @return
-#' \item{Y}{vector of simulated variables}
-#' @importFrom stats rnorm
-#' @details
-#' If the distribution is \eqn{p1 N(\mu1,\sigma1^2) + (1-p1)N(\mu2, \sigma2^2)}
-#' 
-#' param=c(\eqn{\mu1, \sigma1, \mu2, \sigma2}) and prob=c(p1,1-p1)
-#' 
-
-
-
 
 mixture.sim <- function(M, param, prob) {
     

@@ -1,33 +1,7 @@
-# MsdeParEst R package ; file EstParamGamma.r (last modified: 2017-08-09)
+# MsdeParEst R package ; file EstParamGamma.r (last modified: 2017-08-11)
 # Authors: M. Delattre, C. Dion
 # Copyright INRA 2017
 # UMR 518 AgroParisTech/INRA, 16 rue Claude Bernard, 75 231 Paris Cedex 05
-
-#' Estimation In Mixed Stochastic Differential Equations with fixed effects in the drift and one random effect in the diffusion coefficient
-#' 
-#' @description Parameter estimation of the mixed SDE with Gamma distribution of the diffusion random effect 
-#' and fixed effects in the drift:
-#' 
-#'  \eqn{dXj(t)= (\alpha- \beta Xj(t))dt + \sigma_j a(Xj(t)) dWj(t), 1/\sigma_j^2 \sim \Gamma(a,lambda)}, 
-#'  
-#' done with \code{\link{likelihoodGamma}}.
-#' @param U matrix of M sufficient statistics U (see \code{\link{UVS}}).
-#' @param V list of the M sufficient statistics matrix V (see \code{\link{UVS}}).
-#' @param S vector of the M sufficient statistics S (see \code{\link{UVS}}).
-#' @param SigDelta vector of the M constant terms of the individual likelihood (see \code{\link{UVS}}).
-#' @param K number of times of observations.
-#' @param drift.param values of the fixed effects in the drift if know, NULL if the fixed effects are estimated. Defaults to NULL.
-#' @return
-#' \item{mu}{values of the fixed effects in the drift.}
-#' \item{a}{estimated value of the shape of the Gamma distribution.}
-#' \item{lambda}{estimated value of the scale of the Gamma distribution.}
-#' \item{BIChere}{BIC indicator.}
-#' \item{AIChere}{AIC indicator.}
-#' @importFrom stats optim 
-#' @importFrom stats var
-#' 
-#' @references
-#' Estimation of population parameters in stochastic differential equations with random effects in the diffusion coefficient, M. Delattre, V. Genon-Catalot and A. Samson, \emph{ESAIM: Probability and Statistics 2015}, Vol 19, \bold{671 -- 688}
 
 
 EstParamGamma <- function(U, V, S, SigDelta, K, drift.param = NULL) {

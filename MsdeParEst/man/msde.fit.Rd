@@ -6,8 +6,8 @@
 \usage{
 msde.fit(times, X, model = c("OU", "CIR"), drift.random = c(1, 2),
   drift.fixed = NULL, diffusion.random = 0, diffusion.fixed = NULL,
-  mixture = 0, nb.mixt = 1, Niter = 10, discrete = 1, valid = 0,
-  level = 0.05, newwindow = FALSE)
+  nb.mixt = 1, Niter = 10, discrete = 1, valid = 0, level = 0.05,
+  newwindow = FALSE)
 }
 \arguments{
 \item{times}{vector of observation times}
@@ -24,8 +24,6 @@ msde.fit(times, X, model = c("OU", "CIR"), drift.random = c(1, 2),
 
 \item{diffusion.fixed}{NULL if \eqn{\sigma} is estimated (if fixed), value of \eqn{\sigma} otherwise. Default to NULL}
 
-\item{mixture}{1 if the random effects in the drift follow a mixture distribution, 0 otherwise. Default to 0}
-
 \item{nb.mixt}{number of mixture components for the distribution of the random effects in the drift. Default to 1 (no mixture)}
 
 \item{Niter}{number of iterations for the EM algorithm if the random effects in the drift follow a mixture distribution. Default to 10}
@@ -39,7 +37,7 @@ msde.fit(times, X, model = c("OU", "CIR"), drift.random = c(1, 2),
 \item{newwindow}{logical(1), if TRUE, a new window is opened for the plot. Default to FALSE}
 }
 \value{
-\item{index}{is the vector of subscript in 1,...,M used for the estimation. most of the time index=1:M, except for the CIR that requires positive trajectories.}
+\item{index}{is the vector of subscript in 1,...,M used for the estimation. Most of the time index=1:M, except for the CIR that requires positive trajectories.}
 \item{estimphi}{matrix of estimators of the drift random effects \eqn{\hat{\alpha}_j}, or \eqn{\hat{\beta}_j} or \eqn{(\hat{\alpha}_j,\hat{\beta}_j)}}
 \item{estimpsi2}{vector of estimators of the squared diffusion random effects \eqn{\hat{\sigma}_j^2}}
 \item{gridf}{grid of values for the plots of the random effects distribution in the drift, matrix form}
@@ -74,10 +72,11 @@ Parametric estimation of the joint density of the random effects in the mixed SD
 
  \deqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j \ a(X_j(t)) dW_j(t),}
  \eqn{j=1,\ldots,M}, where the \eqn{(W_j(t))} are independant Wiener processes and the \eqn{(X_j(t))} are observed without noise. 
- There can be random effects either in the drift \eqn{(\alpha_j,\beta_j)} or in the diffusion coefficient \eqn{\sigma_j} or both.
+ There can be random effects either in the drift \eqn{(\alpha_j,\beta_j)} or in the diffusion coefficient \eqn{\sigma_j} or both
+ \eqn{(\alpha_j,\beta_j,\sigma_j)}.
 }
 \details{
-Estimation of the random effects density from M independent trajectories of the SDE:
+Parametric estimation of the random effects density from M independent trajectories of the SDE:
 \deqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma_j \ a(X_j(t)) dW_j(t),}
 \eqn{j=1,\ldots,M}, where the \eqn{(W_j(t))} are independant Wiener processes and the \eqn{(X_j(t))} are observed without noise. 
 
@@ -124,8 +123,9 @@ Two diffusions are implemented:
 \bold{Estimation}
 
 \itemize{
-\item If discrete = 0, the estimation is based on the exact likelihood associated with continuous observations ([1],[3]). This is only possible if diffusion.random = 0. 
-\item If discrete = 1, the likelihood of the Euler scheme of the mixed SDE is computed.
+\item If discrete = 0, the estimation is based on the exact likelihood associated with continuous observations ([1],[3]). This is only possible if diffusion.random = 0 and
+\eqn{\sigma} is not estimated by maximum likelihood but empirically by means of the quadratic variations. 
+\item If discrete = 1, the likelihood of the Euler scheme of the mixed SDE is computed and maximized for estimating all the parameters.
 \item If nb.mixt > 1, an EM algorithm is implemented and the number of iterations of the algorithm must be specified with Niter.
 \item If valid = 1, two-thirds of the sample trajectories are used for estimation, while the rest is used for validation. A plot is then provided for
 visual comparison between the true trajectories of the test sample and some predicted trajectories simulated under the estimated model.
@@ -134,6 +134,44 @@ visual comparison between the true trajectories of the test sample and some pred
 \examples{
 
 \dontrun{
+# Example : One random effect in the drift and one random effect in the diffusion
+
+# -- Simulation
+
+sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', 
+                drift.random = 2, drift.param = c(0,0.5,0.5), 
+                diffusion.random = 1, diffusion.param = c(8,1/2))
+                
+# -- Fixed effect in the drift estimated
+res <- msde.fit(times = sim$times, X = sim$X, model = 'OU', drift.random = 2, 
+diffusion.random = 1)
+
+# ----- Fixed effect in the drift known and not estimated
+resbis <- msde.fit(times = sim$times, X = sim$X, model = "OU", drift.random = 2, 
+                    diffusion.random = 1, drift.fixed = 0)
+summary(resbis)
+
+# Example : one mixture of two random effects in the drift, and one fixed effect in
+# the diffusion coefficient
+
+sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', drift.random = c(1,2),
+                diffusion.random = 0, 
+                drift.param = matrix(c(0.5,1.8,0.25,0.25,1,2,0.25,0.25),nrow=2,byrow=F), 
+                diffusion.param = 0.1, nb.mixt = 2, mixt.prop = c(0.5,0.5))
+
+# -- Estimation without validation
+res <- msde.fit(times = sim$times, X = sim$X, model = 'OU', drift.random = c(1,2),
+                nb.mixt=2, Niter = 10)
+
+summary(res)
+plot(res)
+
+# -- Estimation with prediction
+res.valid <- msde.fit(times = sim$times, X = sim$X, model = 'OU', drift.random = c(1,2),
+                      nb.mixt=2, Niter = 10, valid = 1)
+
+summary(res.valid)
+plot(res.valid)
   }
 
 }
@@ -150,4 +188,3 @@ See
 
 \bold{[5]} Estimation of the joint distribution of random effects for a discretely observed diffusion with random effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01446063 2017}
 }
-\keyword{estimation}

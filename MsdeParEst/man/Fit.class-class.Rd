@@ -10,50 +10,50 @@ S4 class for the estimation results in the mixed SDE with random effects in the 
 \section{Slots}{
 
 \describe{
-\item{\code{model}}{character 'OU' or 'CIR'}
+\item{\code{model}}{'OU' or 'CIR' (character)}
 
-\item{\code{drift.random}}{numeric 0, 1, 2, or c(1,2)}
+\item{\code{drift.random}}{0, 1, 2, or c(1,2) (numeric)}
 
-\item{\code{diffusion.random}}{numeric 0 or 1}
+\item{\code{diffusion.random}}{0 or 1 (numeric)}
 
-\item{\code{gridf}}{matrix of values on which the estimation of the density of the random effects in the drift is done}
+\item{\code{gridf}}{matrix of values on which the estimation of the density of the random effects in the drift is done (matrix)}
 
-\item{\code{gridg}}{matrix of values on which the estimation of the density of the random effects in the diffusion is done}
+\item{\code{gridg}}{matrix of values on which the estimation of the density of the random effects in the diffusion is done (matrix)}
 
-\item{\code{mu}}{numeric estimator of the mean mu of the drift random effects}
+\item{\code{mu}}{estimator of the mean mu of the drift random effects (numeric)}
 
-\item{\code{omega}}{numeric estimator of the variance of the drift random effects}
+\item{\code{omega}}{estimator of the variance of the drift random effects (numeric)}
 
-\item{\code{a}}{numeric estimator of the shape of the Gamma distribution for the diffusion random effect}
+\item{\code{a}}{estimator of the shape of the Gamma distribution for the diffusion random effect (numeric)}
 
-\item{\code{lambda}}{numeric estimator of the scale of the Gamma distribution for the diffusion random effect}
+\item{\code{lambda}}{estimator of the scale of the Gamma distribution for the diffusion random effect (numeric)}
 
-\item{\code{sigma2}}{numeric estimated value of \eqn{\sigma^2} if the diffusion coefficient is not random}
+\item{\code{sigma2}}{estimated value of \eqn{\sigma^2} if the diffusion coefficient is not random (numeric)}
 
 \item{\code{index}}{index of the valid trajectories for the considered model (numeric)}
 
 \item{\code{indexestim}}{index of the trajectories used for the estimation (numeric)}
 
-\item{\code{estimphi}}{matrix of the estimator of the drift random effects}
+\item{\code{estimphi}}{matrix of the estimator of the drift random effects (matrix)}
 
-\item{\code{estimpsi2}}{vector of the estimator of the diffusion random effects \eqn{\sigma_j^2}}
+\item{\code{estimpsi2}}{vector of the estimator of the diffusion random effects \eqn{\sigma_j^2} (numeric)}
 
-\item{\code{estimf}}{estimator of the (conditional) density of \eqn{\phi}, matrix form}
+\item{\code{estimf}}{estimator of the (conditional) density of the drift random effects (numeric)}
 
-\item{\code{estimg}}{estimator of the density of \eqn{\phi}, matrix form}
+\item{\code{estimg}}{estimator of the density of \eqn{\sigma_j^2} (numeric)}
 
-\item{\code{estim.drift.fix}}{1 if the user asked for the estimation of fixed parameter in the drift}
+\item{\code{estim.drift.fix}}{1 if the user asked for the estimation of fixed parameter in the drift (numeric)}
 
-\item{\code{estim.diffusion.fix}}{1 if the user asked for the estimation of fixed diffusion coefficient}
+\item{\code{estim.diffusion.fix}}{1 if the user asked for the estimation of fixed diffusion coefficient (numeric)}
 
-\item{\code{discrete}}{1 if the estimation is based on the likelihood of discrete observations, 0 otherwise}
+\item{\code{discrete}}{1 if the estimation is based on the likelihood of discrete observations, 0 otherwise (numeric)}
 
-\item{\code{bic}}{numeric bic}
+\item{\code{bic}}{bic (numeric)}
 
-\item{\code{aic}}{numeric aic}
+\item{\code{aic}}{aic (numeric)}
 
-\item{\code{times}}{vector of observation times, storage of input variable}
+\item{\code{times}}{vector of observation times, storage of input variable (numeric)}
 
-\item{\code{X}}{matrix of observations, storage of input variable}
+\item{\code{X}}{matrix of observations, storage of input variable (matrix)}
 }}
 

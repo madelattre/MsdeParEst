@@ -1,36 +1,8 @@
-# MsdeParEst R package ; file likelihoodNormal.r (last modified: 2017-08-09)
+# MsdeParEst R package ; file likelihoodNormal.r (last modified: 2017-08-11)
 # Authors: M. Delattre, C. Dion
 # Copyright INRA 2017
 # UMR 518 AgroParisTech/INRA, 16 rue Claude Bernard, 75 231 Paris Cedex 05
 
-#' Computation Of The Log Likelihood In Mixed Stochastic Differential Equations with random effects in the drift and fixed effect in the diffusion.
-#' 
-#' @description Computation of -2 log-likelihood of the mixed SDE 
-#' 
-#'  \eqn{dX_j(t)= (\alpha_j- \beta_j X_j(t))dt + \sigma a(X_j(t)) dW_j(t)}
-#'  
-#' with Normal distribution of the drift random effects \eqn{\alpha_j,\beta_j} and fixed effect in the diffusion coefficient.
-#' 
-#' @param mu current value of the mean of the normal distribution.
-#' @param omega current value of the standard deviation of the normal distribution.
-#' @param sigma current value of the diffusion coefficient.
-#' @param U vector of the M sufficient statistics U (see \code{\link{UVS}}).
-#' @param V list of the M sufficient statistics matrix V (see \code{\link{UVS}}).
-#' @param S vector of the M sufficient statistics S (see \code{\link{UVS}}).
-#' @param SigDelta vector of the M constant terms of the individual likelihood (see \code{\link{UVS}}). 
-#' Required only if discrete = 1. Defaults to 0. 
-#' @param K number of times of observations.
-#' @param estimphi matrix of estimators of the random effects. 
-#' @param drift.random random effects in the drift: 1 if one additive random effect, 2 if one multiplicative random effect or c(1,2) if 2 random effects.
-#' @param discrete 1 for discrete observations, 0 otherwise. If discrete = 0, the exact likelihood associated with continuous observations is 
-#' discretized. If discrete = 1, the likelihood of the Euler scheme of the mixed SDE is computed. Defaults to 1.  
-#' @return
-#' \item{L}{value of -2 x loglikelihood}
-#' @references
-#' Maximum likelihood estimation for stochastic differential equations with random effects, M. Delattre, V. Genon-Catalot and A. Samson, \emph{Scandinavian Journal of Statistics 2012}, Vol 40, \bold{322--343}
-#' 
-#' Parametric inference for discrete observations of diffusion processes with mixed effects, M. Delattre, V. Genon-Catalot and C. Laredo, \emph{Preprint}, hal-01332630
-#' 
 
 likelihoodNormal <- function(mu, omega, sigma, U, V, S, SigDelta = 0, K, estimphi, drift.random, 
     discrete = 1) {

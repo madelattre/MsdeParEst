@@ -1,10 +1,10 @@
 rm(list = ls())
 
 devtools::load_all(".")
-# 
-# #nettoie les codes
-# library("formatR")
-# formatR::tidy_dir("R")
+
+#nettoie les codes
+library("formatR")
+formatR::tidy_dir("R")
 
 
 
@@ -41,8 +41,7 @@ require("mvtnorm")
 
 sim1 <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', 
                  drift.random = 2, drift.param = c(0,0.5,0.5), 
-                 diffusion.random = 1, diffusion.param = c(8,1/2),
-                 mixture = 0)
+                 diffusion.random = 1, diffusion.param = c(8,1/2))
 
 
 
@@ -145,18 +144,18 @@ plot(res4.valid)
 sim5 <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', 
                  drift.random = 1, drift.param = matrix(c(0.5,1.8,0.25,0.25,1,1),nrow=2,byrow=F),
                  diffusion.random = 0, diffusion.param = 0.1, 
-                 mixture=1, nb.mixt = 2, mixt.prop = c(0.5,0.5))
+                 nb.mixt = 2, mixt.prop = c(0.5,0.5))
 
 # -- Estimation
 res5 <- msde.fit(times = sim5$times, X = sim5$X, model = 'OU', drift.random = 1,
-                 mixture = 1, nb.mixt=2, Niter = 10)
+                 nb.mixt=2, Niter = 10)
 
 summary(res5)
 plot(res5)
 
 
 res5.valid <- msde.fit(times = sim5$times, X = sim5$X, model = 'OU', drift.random = 1,
-                 mixture = 1, nb.mixt=2, Niter = 10, valid = 1)
+                 nb.mixt=2, Niter = 10, valid = 1)
 
 summary(res5.valid)
 
@@ -165,18 +164,18 @@ summary(res5.valid)
 
 sim6 <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', drift.random = c(1,2),
                  diffusion.random = 0, drift.param = matrix(c(0.5,1.8,0.25,0.25,1,2,0.25,0.25),nrow=2,byrow=F), 
-                 diffusion.param = 0.1, mixture = 1, nb.mixt = 2, mixt.prop = c(0.5,0.5))
+                 diffusion.param = 0.1, nb.mixt = 2, mixt.prop = c(0.5,0.5))
 
 # -- Estimation without prediction
 res6 <- msde.fit(times = sim6$times, X = sim6$X, model = 'OU', drift.random = c(1,2),
-                 mixture = 1, nb.mixt=2, Niter = 10)
+                 nb.mixt=2, Niter = 10)
 
 summary(res6)
 plot(res6)
 
 # -- Estimation with prediction
 res6.valid <- msde.fit(times = sim6$times, X = sim6$X, model = 'OU', drift.random = c(1,2),
-                 mixture = 1, nb.mixt=2, Niter = 10, valid = 1)
+                 nb.mixt=2, Niter = 10, valid = 1)
 
 summary(res6.valid)
 plot(res6.valid)
