@@ -1,4 +1,4 @@
-# MsdeParEst R package ; file msde.fit.r (last modified: 2017-08-11)
+# MsdeParEst R package ; file msde.fit.r (last modified: 2017-08-28)
 # Authors: M. Delattre, C. Dion
 # Copyright INRA 2017
 # UMR 518 AgroParisTech/INRA, 16 rue Claude Bernard, 75 231 Paris Cedex 05
@@ -135,7 +135,7 @@
 #' @examples
 #'
 #' \dontrun{
-#' # Example : One random effect in the drift and one random effect in the diffusion
+#' # Example 1 : One random effect in the drift and one random effect in the diffusion
 #'
 #' # -- Simulation
 #'
@@ -152,7 +152,7 @@
 #'                     diffusion.random = 1, drift.fixed = 0)
 #' summary(resbis)
 #'
-#' # Example : one mixture of two random effects in the drift, and one fixed effect in
+#' # Example 2 : one mixture of two random effects in the drift, and one fixed effect in
 #' # the diffusion coefficient
 #'
 #' sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', drift.random = c(1,2),
@@ -173,6 +173,18 @@
 #'
 #' summary(res.valid)
 #' plot(res.valid)
+#' 
+#' # Example 3 : CIR with one random effect in the drift and one random effect in the diffusion 
+#' # coefficient
+#'
+#' sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'CIR', drift.random = 2,
+#'                 diffusion.random = 1, drift.param = c(4,1,0.1), diffusion.param = c(8,0.5),
+#'                 X0 = 1)
+#'
+#' res <- msde.fit(times = sim$times, X = sim$X, model = 'CIR', drift.random = 2,
+#'                 diffusion.random = 1)
+#'
+#' summary(res)
 #'   }
 #' 
 #' @references See  

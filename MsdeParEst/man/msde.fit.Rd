@@ -134,7 +134,7 @@ visual comparison between the true trajectories of the test sample and some pred
 \examples{
 
 \dontrun{
-# Example : One random effect in the drift and one random effect in the diffusion
+# Example 1 : One random effect in the drift and one random effect in the diffusion
 
 # -- Simulation
 
@@ -151,7 +151,7 @@ resbis <- msde.fit(times = sim$times, X = sim$X, model = "OU", drift.random = 2,
                     diffusion.random = 1, drift.fixed = 0)
 summary(resbis)
 
-# Example : one mixture of two random effects in the drift, and one fixed effect in
+# Example 2 : one mixture of two random effects in the drift, and one fixed effect in
 # the diffusion coefficient
 
 sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', drift.random = c(1,2),
@@ -172,6 +172,18 @@ res.valid <- msde.fit(times = sim$times, X = sim$X, model = 'OU', drift.random =
 
 summary(res.valid)
 plot(res.valid)
+
+# Example 3 : CIR with one random effect in the drift and one random effect in the diffusion 
+# coefficient
+
+sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'CIR', drift.random = 2,
+                diffusion.random = 1, drift.param = c(4,1,0.1), diffusion.param = c(8,0.5),
+                X0 = 1)
+
+res <- msde.fit(times = sim$times, X = sim$X, model = 'CIR', drift.random = 2,
+                diffusion.random = 1)
+
+summary(res)
   }
 
 }
