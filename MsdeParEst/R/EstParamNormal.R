@@ -20,9 +20,15 @@ EstParamNormal <- function(U, V, S, SigDelta = 0, K, drift.fixed = NULL,
         
         if (is.null(sigma)) {
             
-            k <- 0.1
+            #k <- 0.1
             
-            estimGamma <- (K/S) * ((S/K) >= (k/sqrt(K)))
+            # estimGamma <- (K/S) * ((S/K) >= (k/sqrt(K)))
+            
+            estimGamma <- (K/S) * ((S/K) > 0)
+          
+            # if (prod(estimGamma==0)==1){
+            #   estimGamma <- (K/S) * ((S/K) > 0)
+            # }
             
             init.gamma <- mean(estimGamma)
             init.sigma <- 1/sqrt(init.gamma)

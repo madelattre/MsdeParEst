@@ -6,20 +6,22 @@ EstParamNormalGamma <- function(U, V, S, SigDelta, K, drift.random, drift.fixed 
     
     M <- length(S)
     
-    k <- 0.1
+    # k <- 0.1
     
-    estimGamma <- (K/S) * ((S/K) >= (k/sqrt(K)))
+    # estimGamma <- (K/S) * ((S/K) >= (k/sqrt(K)))
+    
+    estimGamma <- (K/S) * ((S/K) > 0)
     
     init.a <- mean(estimGamma)^2/var(estimGamma)
     init.lambda <- var(estimGamma)/mean(estimGamma)
     
     V1 <- function(param) {
-        contrastGamma(param[1], param[2], U, V, S, K, c(0, 0))
+        contrastGamma(exp(param[1]), exp(param[2]), U, V, S, K, c(0, 0))
     }
     
-    res.gamma <- suppressWarnings(optim(c(init.a, init.lambda), fn = V1, method = "Nelder-Mead"))
-    a <- res.gamma$par[1]
-    lambda <- res.gamma$par[2]
+    res.gamma <- suppressWarnings(optim(c(log(init.a), log(init.lambda)), fn = V1, method = "Nelder-Mead"))
+    a <- exp(res.gamma$par[1])
+    lambda <- exp(res.gamma$par[2])
     
     estimphi <- matrix(NA, 2, M)
     

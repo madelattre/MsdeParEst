@@ -1676,6 +1676,10 @@ setMethod("summary", "Mixture.fit.class", function(object) {
       
     }
     
+    cat("\nFixed effect in the diffusion coefficient:\n")
+    
+      print(matrix(c("sigma", round(sqrt(object@sigma2), 6)), 1, 2, byrow = TRUE), quote = FALSE, 
+            right = TRUE)
     
     cat("\nCriteria for model selection:\n")
     
