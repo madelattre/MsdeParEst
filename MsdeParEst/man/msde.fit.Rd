@@ -133,30 +133,27 @@ visual comparison between the true trajectories of the test sample and some pred
 }
 \examples{
 
-\dontrun{
+
 # Example 1 : One random effect in the drift and one random effect in the diffusion
 
-# -- Simulation
-
-sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', 
+sim <- msde.sim(M = 25, T = 1, N = 1000, model = 'OU', 
                 drift.random = 2, drift.param = c(0,0.5,0.5), 
                 diffusion.random = 1, diffusion.param = c(8,1/2))
-                
-# -- Fixed effect in the drift estimated
+
 res <- msde.fit(times = sim$times, X = sim$X, model = 'OU', drift.random = 2, 
 diffusion.random = 1)
 
-# ----- Fixed effect in the drift known and not estimated
-resbis <- msde.fit(times = sim$times, X = sim$X, model = "OU", drift.random = 2, 
-                    diffusion.random = 1, drift.fixed = 0)
-summary(resbis)
+summary(res)
+plot(res)
+
+\dontrun{
 
 # Example 2 : one mixture of two random effects in the drift, and one fixed effect in
 # the diffusion coefficient
 
 sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', drift.random = c(1,2),
                 diffusion.random = 0, 
-                drift.param = matrix(c(0.5,1.8,0.25,0.25,1,2,0.25,0.25),nrow=2,byrow=F), 
+                drift.param = matrix(c(0.5,1.8,0.25,0.25,1,2,0.25,0.25),nrow=2,byrow=FALSE), 
                 diffusion.param = 0.1, nb.mixt = 2, mixt.prop = c(0.5,0.5))
 
 # -- Estimation without validation
@@ -199,4 +196,7 @@ See
 \bold{[4]} Parametric inference for discrete observations of diffusion processes with mixed effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01332630 2016}
 
 \bold{[5]} Estimation of the joint distribution of random effects for a discretely observed diffusion with random effects, Delattre, M., Genon-Catalot, V. and Laredo, C. \emph{hal-01446063 2017}
+}
+\author{
+Maud Delattre and Charlotte Dion
 }

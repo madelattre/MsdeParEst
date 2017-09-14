@@ -1,7 +1,7 @@
 \name{MsdeParEst-package}
 \alias{MsdeParEst-package}
 \docType{package}
-\title{Parametric estimation in mixed-effects stochastic differential equations}
+\title{Parametric Estimation in Mixed-Effects Stochastic Differential Equations}
 \description{
 Parametric estimation in mixed-effects stochastic differential equations
 }

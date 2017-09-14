@@ -1,7 +1,6 @@
 # MsdeParEst R package ; file msde.sim.r (last modified: 2017-08-28)
 # Authors: M. Delattre, C. Dion
 # Copyright INRA 2017
-# UMR 518 AgroParisTech/INRA, 16 rue Claude Bernard, 75 231 Paris Cedex 05
 
 #' Simulation Of A Mixed Stochastic Differential Equation
 #' 
@@ -34,31 +33,32 @@
 #' 
 #' @examples 
 #' 
-#'  \dontrun{
+#'  
 #'  # Example 1 : one random effect in the drift and one fixed effect in the diffusion coefficient
-#'  sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', drift.random = 2,
+#'  sim <- msde.sim(M = 30, T = 1, N = 1000, model = 'OU', drift.random = 2,
 #'                 diffusion.random = 0, drift.param = c(0,1,sqrt(0.4/4)), diffusion.param = 0.5)
 #'                 
-#'  # Example : two random effects in the drift and one random effect in the diffusion coefficient
+#'  # Example 2 : two random effects in the drift and one random effect in the diffusion coefficient
 #'
-#'  sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', drift.random = c(1,2),
+#'  sim <- msde.sim(M = 30, T = 1, N = 1000, model = 'OU', drift.random = c(1,2),
 #'                 diffusion.random = 1, drift.param = c(1,0.5,0.5,0.5), diffusion.param = c(8,1/2))
-#'                 
-#'  # Example 2 : one fixed effect and one mixture random effect in the drift, and one fixed effect in
+#'           
+#'  # Example 3 : one fixed effect and one mixture random effect in the drift, and one fixed effect in
 #'  # the diffusion coefficient
 #'  
-#'  sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'OU', 
-#'                  drift.random = 1, drift.param = matrix(c(0.5,1.8,0.25,0.25,1,1),nrow=2,byrow=F),
+#'  sim <- msde.sim(M = 30, T = 1, N = 1000, model = 'OU', 
+#'                  drift.random = 1, drift.param = 
+#'                  matrix(c(0.5,1.8,0.25,0.25,1,1),nrow=2,byrow=FALSE),
 #'                  diffusion.random = 0, diffusion.param = 0.1, 
 #'                  nb.mixt = 2, mixt.prop = c(0.5,0.5))
 #'                  
-#' # Example 3 : CIR with one random effect in the drift and one random effect in the diffusion 
+#' # Example 4 : CIR with one random effect in the drift and one random effect in the diffusion 
 #' # coefficient
 #'
-#' sim <- msde.sim(M = 100, T = 5, N = 5000, model = 'CIR', drift.random = 2,
+#' sim <- msde.sim(M = 30, T = 1, N = 1000, model = 'CIR', drift.random = 2,
 #'                 diffusion.random = 1, drift.param = c(4,1,0.1), diffusion.param = c(8,0.5),
 #'                 X0 = 1)
-#'  } 
+#'  
 #' 
 #' @details
 #' Simulation of N discrete observations on time interval [t0,T] of M independent trajectories of the SDE 
@@ -96,9 +96,10 @@
 #' 
 #' Simulation and Inference for stochastic differential equation, S.Iacus, \emph{Springer Series in Statistics 2008}
 #' Chapter 2
-#' @seealso \url{http://cran.r-project.org/package=sde}
+#' @seealso \url{https://CRAN.R-project.org/package=sde}
 #' 
-
+#' @author Maud Delattre and Charlotte Dion
+#' @export
 
 
 msde.sim <- function(M, T, N = 100, model, drift.random, diffusion.random, 

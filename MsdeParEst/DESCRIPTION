@@ -1,8 +1,12 @@
 Package: MsdeParEst
 Type: Package
-Title: Parametric estimation in mixed-effects stochastic differential equations
-Version: 1.0
+Title: Parametric Estimation in Mixed-Effects Stochastic Differential Equations
+Version: 1.3
 Date: 2017-08-28
+Author@R: c(person("Maud", "Delattre", role = c("aut", "cre", "cph"),
+                     email = "Maud.Delattre@agroparistech.fr"),
+              person("Charlotte", "Dion", role = "aut"),
+              )
 Author: Maud Delattre, Charlotte Dion
 Maintainer: Maud Delattre <maud.delattre@agroparistech.fr>
 Description: Parametric estimation in stochastic differential equations with random effects in the drift, or in the diffusion or both. Approximate maximum likelihood methods are used. M. Delattre, V. Genon-Catalot and A. Samson (2012) <doi:10.1111/j.1467-9469.2012.00813.x> M. Delattre, V. Genon-Catalot and A. Samson (2015) <doi:10.1051/ps/2015006> M. Delattre, V. Genon-Catalot and A. Samson (2016) <doi:10.1016/j.jspi.2015.12.003>.

@@ -1,7 +1,6 @@
 # MsdeParEst R package ; file UVS.r (last modified: 2017-08-28)
 # Authors: M. Delattre, C. Dion
 # Copyright INRA 2017
-# UMR 518 AgroParisTech/INRA, 16 rue Claude Bernard, 75 231 Paris Cedex 05
 
 UVS <- function(X, model, times) {
     
