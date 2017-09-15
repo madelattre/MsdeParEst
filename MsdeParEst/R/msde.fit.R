@@ -675,7 +675,7 @@ msde.fit <- function(times, X, model = c("OU", "CIR"), drift.random = c(1,2), dr
     muinit <- matrix(0, nb.mixt, 2)
     omegainit <- matrix(0, nb.mixt, 2)
     
-    km <- kmeans(t(estimphi), 2)
+    km <- kmeans(t(estimphi), nb.mixt)
     
     if (sum(drift.random) == 3) {
       for (n in 1:nb.mixt) {
