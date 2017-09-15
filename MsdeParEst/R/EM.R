@@ -1,4 +1,4 @@
-# MsdeParEst R package ; file em.r (last modified: 2017-08-28)
+# MsdeParEst R package ; file em.r (last modified: 2017-09-15)
 # Authors: M. Delattre, C. Dion
 # Copyright INRA 2017
 
@@ -24,11 +24,9 @@ EM <- function(U, V, S, K, drift.random, start, Niter = 10, drift.fixed = NULL,
     }
     
     omegahat <- array(0, c(Niter, N, 2))
-    #omegahat <- array(0, c(Niter, 2, N))
     omegahat[1, , ] <- omega/sigma
     
     muhat <- array(0, c(Niter, N, 2))
-    #muhat <- array(0, c(Niter, 2, N))
     muhat[1, , ] <- mu
     
     probhat <- matrix(0, nrow = Niter, ncol = N)

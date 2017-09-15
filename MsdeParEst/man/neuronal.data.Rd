@@ -22,7 +22,7 @@ N <- T/delta  # number of points in the time interval 2000
 data(neuronal.data)
 # reduction of data for example to save running times
 ind <- seq(1, 2000, by = 20)
-X <- neuronal.data[[1]][1:100, ind]
+X <- neuronal.data[[1]][1:50, ind]
 times <- neuronal.data[[2]][ind]
 
 # - 1) Ornstein-Uhlenbeck with two random effects in the drift and one fixed effect in the diffusion
@@ -30,6 +30,7 @@ times <- neuronal.data[[2]][ind]
 estim<- msde.fit(times=times, X=X, model="OU")
 # summary(estim)
 
+\dontrun{
 # - 2) Cox-Ingersoll-Ross with one random effect in the drift and one random effect in the diffusion
 
 estim<- msde.fit(times=times, X=X, model="CIR", drift.random=1, diffusion.random=1)
@@ -41,7 +42,6 @@ estim<- msde.fit(times=times, X=X, model="CIR", drift.random=1, diffusion.random
 estim<- msde.fit(times=times, X=X, model="CIR", drift.random=1)
 # summary(estim)
 
-\donttest{
 # - 4) Ornstein-Uhlenbeck with a mixture distribution for the two random effects in the drift
 # and one fixed effect in the diffusion
 

@@ -1,4 +1,4 @@
-# MsdeParEst R package ; file msde.fit.r (last modified: 2017-08-28)
+# MsdeParEst R package ; file msde.fit.r (last modified: 2017-09-15)
 # Authors: M. Delattre, C. Dion
 # Copyright INRA 2017
 
@@ -180,6 +180,8 @@
 #'                 diffusion.random = 1)
 #'
 #' summary(res)
+#' 
+#' # Further examples can be found in the section dedicated to neuronal.data.
 #'   }
 #' 
 #' @references See  

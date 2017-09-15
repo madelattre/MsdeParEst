@@ -181,6 +181,8 @@ res <- msde.fit(times = sim$times, X = sim$X, model = 'CIR', drift.random = 2,
                 diffusion.random = 1)
 
 summary(res)
+
+# Further examples can be found in the section dedicated to neuronal.data.
   }
 
 }

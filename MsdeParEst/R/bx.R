@@ -1,4 +1,4 @@
-# MsdeParEst R package ; bx.r (last modified: 2017-08-28)
+# MsdeParEst R package ; bx.r (last modified: 2017-09-15)
 # Authors: M. Delattre, C. Dion
 # Copyright INRA 2017
 
