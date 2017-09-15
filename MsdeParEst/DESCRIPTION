@@ -1,7 +1,7 @@
 Package: MsdeParEst
 Type: Package
 Title: Parametric Estimation in Mixed-Effects Stochastic Differential Equations
-Version: 1.5
+Version: 1.6
 Date: 2017-09-15
 Authors@R: c(person(given="Maud", family="Delattre", role = c("aut","cre","cph"),
                      email = "maud.delattre@agroparistech.fr"),
